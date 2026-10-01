@@ -12,7 +12,6 @@ import {
   StatusBar,
   Platform,
   TextInput,
-  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -24,7 +23,6 @@ import {
 } from '@expo/vector-icons';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
 const scaleFont = (size: number) => {
   const scale = SCREEN_WIDTH / 375;
   const newSize = size * scale;
@@ -150,7 +148,8 @@ const INITIAL_SCHOLAR_RESULTS: ScholarSearchItem[] = [
     title: 'Artificial Intelligence in Higher Education: Promises and Pitfalls',
     authors: 'Zawacki-Richter, O., Marín, V. I., Bond, M., & Gouverneur, F.',
     publication: 'International Journal of Educational Technology in Higher Education, 2019',
-    snippet: 'This systematic review synthesizes research on AI applications in higher education and categorizes them into profiling, assessment, and tutoring systems.',
+    snippet:
+      'This systematic review synthesizes research on AI applications in higher education and categorizes them into profiling, assessment, and tutoring systems.',
     citedBy: 1420,
     pdfAvailable: true,
     isSaved: false,
@@ -160,7 +159,8 @@ const INITIAL_SCHOLAR_RESULTS: ScholarSearchItem[] = [
     title: 'Impact of AI-Powered Learning Support Tools on Academic Performance',
     authors: 'Chen, L., Chen, P., & Lin, Z.',
     publication: 'Computers & Education, 162, 104084, 2021',
-    snippet: 'We investigate how student engagement with conversational AI assistants improves conceptual understanding and reduces study friction in STEM courses.',
+    snippet:
+      'We investigate how student engagement with conversational AI assistants improves conceptual understanding and reduces study friction in STEM courses.',
     citedBy: 389,
     pdfAvailable: true,
     isSaved: true,
@@ -170,7 +170,8 @@ const INITIAL_SCHOLAR_RESULTS: ScholarSearchItem[] = [
     title: 'Ethics and Governance of Artificial Intelligence in Student Workflows',
     authors: 'Holmes, W., Bialik, M., & Fadel, C.',
     publication: 'Center for Curriculum Redesign, 2020',
-    snippet: 'An exploration of ethical considerations, academic integrity, and policy frameworks surrounding automated writing and search tools in universities.',
+    snippet:
+      'An exploration of ethical considerations, academic integrity, and policy frameworks surrounding automated writing and search tools in universities.',
     citedBy: 512,
     pdfAvailable: false,
     isSaved: false,
@@ -227,15 +228,12 @@ export default function Home() {
     'main' | 'notifications' | 'roadmap' | 'references' | 'defensePrep' | 'googleScholar'
   >('main');
   const [notifFilterTab, setNotifFilterTab] = useState<'All' | 'Unread'>('All');
-
   const [workspaceSubTab, setWorkspaceSubTab] = useState<
     'Overview' | 'Chapters' | 'Notes' | 'Activity'
   >('Activity');
-
   const [taskSubTab, setTaskSubTab] = useState<'My Tasks' | 'All Tasks' | 'Calendar'>('My Tasks');
   const [feedbackSubTab, setFeedbackSubTab] = useState<'Feedback' | 'Calendar'>('Feedback');
   const [refTab, setRefTab] = useState<'All' | 'Book' | 'Journal' | 'Website'>('All');
-
   const [scholarQuery, setScholarQuery] = useState('Artificial Intelligence in Education');
   const [scholarFilter, setScholarFilter] = useState<'Any time' | 'Since 2023' | 'Since 2026'>('Any time');
   const [scholarResults, setScholarResults] = useState<ScholarSearchItem[]>(INITIAL_SCHOLAR_RESULTS);
@@ -262,7 +260,6 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState<number>(4);
   const [currentYear, setCurrentYear] = useState<number>(2026);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
-
   const [appOpenDates] = useState<string[]>([
     '2026-05-01',
     '2026-05-03',
@@ -299,10 +296,11 @@ export default function Home() {
     }
   };
 
-  const toggleSaveScholarItem = (id: string) =>
+  const toggleSaveScholarItem = (id: string) => {
     setScholarResults((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isSaved: !item.isSaved } : item))
     );
+  };
 
   const filteredNotifications = INITIAL_NOTIFICATIONS.filter((item) => {
     if (notifFilterTab === 'Unread') return item.isUnread;
@@ -317,7 +315,7 @@ export default function Home() {
     return item.type === refTab;
   });
 
-  const renderNotificon = (type: NotificationItem['iconType'], color: string) => {
+  const renderNotifIcon = (type: NotificationItem['iconType'], color: string) => {
     switch (type) {
       case 'person':
         return <Ionicons name="person" size={scaleFont(22)} color={color} />;
@@ -361,10 +359,8 @@ export default function Home() {
             <Text style={styles.loginAppTitle}>Thesis Pilot</Text>
             <Text style={styles.loginSubtitle}>Your AI-Powered Academic Companion</Text>
           </View>
-
           <View style={styles.loginCard}>
             <Text style={styles.loginCardTitle}>Sign In</Text>
-
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Username or Email</Text>
               <View style={styles.textInputWrapper}>
@@ -379,7 +375,6 @@ export default function Home() {
                 />
               </View>
             </View>
-
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Full Name</Text>
               <View style={styles.textInputWrapper}>
@@ -393,7 +388,6 @@ export default function Home() {
                 />
               </View>
             </View>
-
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Password</Text>
               <View style={styles.textInputWrapper}>
@@ -408,11 +402,13 @@ export default function Home() {
                 />
               </View>
             </View>
-
-            <TouchableOpacity style={styles.loginSubmitBtn} onPress={handleLogin} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.loginSubmitBtn}
+              onPress={handleLogin}
+              activeOpacity={0.8}
+            >
               <Text style={styles.loginSubmitBtnText}>Log In</Text>
             </TouchableOpacity>
-
             <View style={styles.loginFooterRow}>
               <Text style={styles.loginFooterText}>Saved credentials are stored locally</Text>
             </View>
@@ -425,7 +421,6 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1D61E7" />
-
       {/* 1. HEADER BAR */}
       <View style={styles.dashboardHeader}>
         {currentView === 'main' ? (
@@ -524,12 +519,7 @@ export default function Home() {
               style={[styles.notifTabBtn, notifFilterTab === 'All' && styles.notifActiveTabBtn]}
               onPress={() => setNotifFilterTab('All')}
             >
-              <Text
-                style={[
-                  styles.notifTabText,
-                  notifFilterTab === 'All' && styles.notifActiveTabText,
-                ]}
-              >
+              <Text style={[styles.notifTabText, notifFilterTab === 'All' && styles.notifActiveTabText]}>
                 All
               </Text>
             </TouchableOpacity>
@@ -537,12 +527,7 @@ export default function Home() {
               style={[styles.notifTabBtn, notifFilterTab === 'Unread' && styles.notifActiveTabBtn]}
               onPress={() => setNotifFilterTab('Unread')}
             >
-              <Text
-                style={[
-                  styles.notifTabText,
-                  notifFilterTab === 'Unread' && styles.notifActiveTabText,
-                ]}
-              >
+              <Text style={[styles.notifTabText, notifFilterTab === 'Unread' && styles.notifActiveTabText]}>
                 Unread
               </Text>
             </TouchableOpacity>
@@ -553,13 +538,8 @@ export default function Home() {
                 <Text style={styles.notifSectionHeader}>Today</Text>
                 {todayNotifications.map((item) => (
                   <View key={item.id} style={styles.notifCard}>
-                    <View
-                      style={[
-                        styles.notifIconContainer,
-                        { backgroundColor: item.iconBgColor },
-                      ]}
-                    >
-                      {renderNotificon(item.iconType, item.iconColor)}
+                    <View style={[styles.notifIconContainer, { backgroundColor: item.iconBgColor }]}>
+                      {renderNotifIcon(item.iconType, item.iconColor)}
                     </View>
                     <View style={styles.notifTextContainer}>
                       <View style={styles.notifCardHeaderRow}>
@@ -583,13 +563,8 @@ export default function Home() {
                 <Text style={styles.notifSectionHeader}>Yesterday</Text>
                 {yesterdayNotifications.map((item) => (
                   <View key={item.id} style={styles.notifCard}>
-                    <View
-                      style={[
-                        styles.notifIconContainer,
-                        { backgroundColor: item.iconBgColor },
-                      ]}
-                    >
-                      {renderNotificon(item.iconType, item.iconColor)}
+                    <View style={[styles.notifIconContainer, { backgroundColor: item.iconBgColor }]}>
+                      {renderNotifIcon(item.iconType, item.iconColor)}
                     </View>
                     <View style={styles.notifTextContainer}>
                       <View style={styles.notifCardHeaderRow}>
@@ -617,13 +592,7 @@ export default function Home() {
         <View style={styles.roadmapContentContainer}>
           <ScrollView contentContainerStyle={styles.roadmapScrollList} showsVerticalScrollIndicator={false}>
             <View style={styles.roadmapProgressHeader}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={styles.roadmapProgressTitle}>Overall Progress</Text>
                 <Text style={styles.roadmapProgressPercent}>68%</Text>
               </View>
@@ -658,8 +627,7 @@ export default function Home() {
                           style={[
                             styles.roadmapConnectingLine,
                             {
-                              backgroundColor:
-                                item.status === 'completed' ? '#22C55E' : '#CBD5E1',
+                              backgroundColor: item.status === 'completed' ? '#22C55E' : '#CBD5E1',
                             },
                           ]}
                         />
@@ -858,7 +826,6 @@ export default function Home() {
               </TouchableOpacity>
             ))}
           </ScrollView>
-
           <Modal
             visible={!!selectedPaper}
             transparent
@@ -943,7 +910,6 @@ export default function Home() {
                 </View>
               </View>
             </View>
-
             <View style={styles.defenseCard}>
               <View
                 style={{
@@ -1026,7 +992,6 @@ export default function Home() {
               </TouchableOpacity>
             ))}
           </View>
-
           <View style={{ flex: 1 }}>
             {workspaceSubTab === 'Overview' && (
               <ScrollView
@@ -1071,7 +1036,6 @@ export default function Home() {
                 </View>
               </ScrollView>
             )}
-
             {workspaceSubTab === 'Chapters' && (
               <ScrollView
                 contentContainerStyle={styles.workspaceScrollContent}
@@ -1128,7 +1092,6 @@ export default function Home() {
                 ))}
               </ScrollView>
             )}
-
             {workspaceSubTab === 'Notes' && (
               <ScrollView
                 contentContainerStyle={styles.workspaceScrollContent}
@@ -1213,13 +1176,11 @@ export default function Home() {
                 </View>
               </ScrollView>
             )}
-
             {workspaceSubTab === 'Activity' && (
               <ScrollView
                 contentContainerStyle={styles.workspaceScrollContent}
                 showsVerticalScrollIndicator={false}
               >
-                {/* Fixed and aligned section header for Thesis Workspace (Activity) */}
                 <View style={styles.chaptersHeaderRow}>
                   <Text style={styles.sectionHeaderTitle}>Activity</Text>
                   <TouchableOpacity style={styles.activityDropdownBtn}>
@@ -1227,7 +1188,6 @@ export default function Home() {
                     <Ionicons name="chevron-down" size={scaleFont(14)} color="#000" />
                   </TouchableOpacity>
                 </View>
-
                 <Text style={styles.timelineSectionTitle}>Today</Text>
                 <View style={styles.timelineList}>
                   <View style={styles.timelineItem}>
@@ -1248,7 +1208,6 @@ export default function Home() {
                       <Text style={styles.timelineTime}>2 hours ago</Text>
                     </View>
                   </View>
-
                   <View style={styles.timelineItem}>
                     <View style={styles.timelineLeftColumn}>
                       <View style={styles.timelineDotIconFile}>
@@ -1275,7 +1234,6 @@ export default function Home() {
                       <Text style={styles.timelineTime}>5 hours ago</Text>
                     </View>
                   </View>
-
                   <View style={styles.timelineItem}>
                     <View style={styles.timelineLeftColumn}>
                       <View style={styles.timelineDotIconGreen}>
@@ -1294,7 +1252,6 @@ export default function Home() {
                     </View>
                   </View>
                 </View>
-
                 <Text style={[styles.timelineSectionTitle, { marginTop: 16 }]}>Yesterday</Text>
                 <View style={styles.timelineList}>
                   <View style={styles.timelineItem}>
@@ -1315,7 +1272,6 @@ export default function Home() {
                       <Text style={styles.timelineTime}>Yesterday, 3:00 PM</Text>
                     </View>
                   </View>
-
                   <View style={styles.timelineItem}>
                     <View style={styles.timelineLeftColumn}>
                       <View style={styles.timelineDotIconNote}>
@@ -1340,7 +1296,6 @@ export default function Home() {
               </ScrollView>
             )}
           </View>
-
           <TouchableOpacity style={styles.fabButton} activeOpacity={0.8}>
             <MaterialCommunityIcons name="robot" size={scaleFont(22)} color="#FFF" />
           </TouchableOpacity>
@@ -1407,7 +1362,6 @@ export default function Home() {
                     </ScrollView>
                   </View>
                 ) : null}
-
                 <View style={styles.calendarHeaderRow}>
                   <TouchableOpacity onPress={handlePrevMonth} style={styles.calNavBtn}>
                     <Ionicons name="chevron-back" size={scaleFont(18)} color="#1D61E7" />
@@ -1430,7 +1384,6 @@ export default function Home() {
                     <Ionicons name="chevron-forward" size={scaleFont(18)} color="#1D61E7" />
                   </TouchableOpacity>
                 </View>
-
                 <View style={styles.calendarDaysHeader}>
                   {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day, idx) => (
                     <Text key={idx} style={styles.dayHeaderCell}>
@@ -1438,7 +1391,6 @@ export default function Home() {
                     </Text>
                   ))}
                 </View>
-
                 <View style={styles.calendarGrid}>
                   {[26, 27, 28, 29, 30].map((d) => (
                     <Text key={`prev-${d}`} style={styles.dimmedDateCell}>
@@ -1481,7 +1433,6 @@ export default function Home() {
                     );
                   })}
                 </View>
-
                 <View style={styles.selectedDateEventsHeader}>
                   <Text style={styles.selectedDateTitle}>
                     {monthsList[currentMonth]} {selectedDate}, {currentYear}
@@ -1490,7 +1441,6 @@ export default function Home() {
                     <Text style={styles.todayBtnText}>Today</Text>
                   </TouchableOpacity>
                 </View>
-
                 <View style={styles.taskCardItem}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Ionicons name="ellipse" size={scaleFont(8)} color="#2563EB" />
@@ -1502,7 +1452,6 @@ export default function Home() {
                     <Text style={styles.taskCardTime}>10:00 AM</Text>
                   </View>
                 </View>
-
                 <View style={styles.taskCardItem}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Ionicons name="ellipse" size={scaleFont(8)} color="#3B82F6" />
@@ -1512,7 +1461,6 @@ export default function Home() {
                     <Text style={styles.taskStatusInProgress}>In Progress</Text>
                   </View>
                 </View>
-
                 <View style={styles.taskCardItem}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Ionicons name="ellipse" size={scaleFont(8)} color="#64748B" />
@@ -1544,7 +1492,6 @@ export default function Home() {
                   </View>
                   <Text style={styles.taskDueDateOverdue}>May 18</Text>
                 </View>
-
                 <Text style={[styles.taskSectionHeader, { marginTop: 16 }]}>In Progress</Text>
                 <View style={styles.taskListItem}>
                   <Ionicons name="ellipse-outline" size={scaleFont(20)} color="#3B82F6" />
@@ -1562,7 +1509,6 @@ export default function Home() {
                   </View>
                   <Text style={styles.taskDueDateNormal}>May 25</Text>
                 </View>
-
                 <Text style={[styles.taskSectionHeader, { marginTop: 16 }]}>To Do</Text>
                 <View style={styles.taskListItem}>
                   <Ionicons name="ellipse-outline" size={scaleFont(20)} color="#94A3B8" />
@@ -1583,7 +1529,6 @@ export default function Home() {
               </ScrollView>
             )}
           </View>
-
           <TouchableOpacity style={styles.fabButton} activeOpacity={0.8}>
             <MaterialCommunityIcons name="robot" size={scaleFont(22)} color="#FFF" />
           </TouchableOpacity>
@@ -1607,7 +1552,6 @@ export default function Home() {
                 <Ionicons name="options-outline" size={scaleFont(18)} color="#000" />
               </TouchableOpacity>
             </View>
-
             {[
               { id: '1', title: 'Chapter 1 Introduction', count: '13 Files' },
               { id: '2', title: 'Chapter 2 Literature Review', count: '15 Files' },
@@ -1631,7 +1575,6 @@ export default function Home() {
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
-
             <TouchableOpacity
               style={styles.fileRowCard}
               activeOpacity={0.7}
@@ -1646,7 +1589,6 @@ export default function Home() {
                 <Ionicons name="ellipsis-vertical" size={scaleFont(18)} color="#64748B" />
               </TouchableOpacity>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.fileRowCard}
               activeOpacity={0.7}
@@ -1661,7 +1603,6 @@ export default function Home() {
                 <Ionicons name="ellipsis-vertical" size={scaleFont(18)} color="#64748B" />
               </TouchableOpacity>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.fileRowCard}
               activeOpacity={0.7}
@@ -1677,7 +1618,6 @@ export default function Home() {
               </TouchableOpacity>
             </TouchableOpacity>
           </ScrollView>
-
           <TouchableOpacity style={styles.fabButton} activeOpacity={0.8}>
             <MaterialCommunityIcons name="robot" size={scaleFont(22)} color="#FFF" />
           </TouchableOpacity>
@@ -1739,7 +1679,6 @@ export default function Home() {
                     <Text style={styles.replyBtnText}>Reply</Text>
                   </TouchableOpacity>
                 </View>
-
                 <View style={styles.feedbackCard}>
                   <View style={styles.adviserHeaderRow}>
                     <View style={styles.adviserAvatarCircle}>
@@ -1790,7 +1729,6 @@ export default function Home() {
                     <Text style={styles.statusReviewedTag}>Reviewed</Text>
                   </View>
                 </View>
-
                 <View style={styles.recentFeedbackCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={styles.adviserAvatarCircle}>
@@ -1806,7 +1744,6 @@ export default function Home() {
                     <Text style={styles.statusRevisionsTag}>Revisions Needed</Text>
                   </View>
                 </View>
-
                 <View style={styles.recentFeedbackCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={styles.adviserAvatarCircle}>
@@ -1822,14 +1759,14 @@ export default function Home() {
                     <Text style={styles.statusReviewedTag}>Reviewed</Text>
                   </View>
                 </View>
-
                 <TouchableOpacity style={{ alignSelf: 'flex-end', marginVertical: 6 }}>
                   <Text style={{ color: '#1D61E7', fontSize: scaleFont(11), fontWeight: '600' }}>
                     View all feedback
                   </Text>
                 </TouchableOpacity>
-
-                <Text style={[styles.sectionHeaderTitle, { marginTop: 12 }]}>Upcoming Meetings</Text>
+                <Text style={[styles.sectionHeaderTitle, { marginTop: 12 }]}>
+                  Upcoming Meetings
+                </Text>
                 <View style={styles.meetingCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={styles.adviserAvatarCircle}>
@@ -1859,7 +1796,11 @@ export default function Home() {
         </View>
       ) : (
         /* DASHBOARD CONTENT */
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} bounces={false}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
           {/* Fixed aligned greeting header for Student Dashboard */}
           <View style={styles.greetingContainer}>
             <View style={{ flex: 1, paddingRight: 8 }}>
@@ -1874,7 +1815,6 @@ export default function Home() {
               <Ionicons name="settings-outline" size={scaleFont(18)} color="#64748B" />
             </TouchableOpacity>
           </View>
-
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.7}
@@ -1890,7 +1830,6 @@ export default function Home() {
             </View>
             <Text style={styles.progressSubText}>68% completed</Text>
           </TouchableOpacity>
-
           <View style={styles.statsGrid}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel} numberOfLines={1}>
@@ -1920,7 +1859,6 @@ export default function Home() {
               <Text style={styles.statSub}>Tasks</Text>
             </View>
           </View>
-
           <View style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardSectionTitle}>Milestone Progress</Text>
@@ -1999,7 +1937,6 @@ export default function Home() {
               </View>
             </View>
           </View>
-
           <View style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardSectionTitle}>Upcoming Deadlines</Text>
@@ -2031,7 +1968,6 @@ export default function Home() {
               <Text style={styles.deadlineDate}>June 01, 2026</Text>
             </View>
           </View>
-
           <View style={styles.card}>
             <View style={styles.cardHeaderRow}>
               <Text style={styles.cardSectionTitle}>Recent Activity</Text>
@@ -2231,7 +2167,6 @@ function HamburgerMenu({
               <Ionicons name="school" size={scaleFont(32)} color="#1D61E7" />
               <Text style={styles.logoText}>ThesisPilot</Text>
             </View>
-
             <View style={styles.menuList}>
               <TouchableOpacity
                 style={[styles.menuItem, styles.activeMenuItem]}
@@ -2297,9 +2232,7 @@ function HamburgerMenu({
                 <Ionicons name="time-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Defense Preparation</Text>
               </TouchableOpacity>
-
               <View style={styles.divider} />
-
               <TouchableOpacity style={styles.menuItem}>
                 <Ionicons name="settings-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Settings</Text>
@@ -3453,24 +3386,26 @@ const styles = StyleSheet.create({
   },
   taskListTitle: {
     fontSize: scaleFont(12),
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#0F172A',
   },
   taskListSub: {
     fontSize: scaleFont(10),
     color: '#64748B',
+    marginTop: 2,
   },
   taskDueDateOverdue: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#EF4444',
     fontWeight: 'bold',
   },
   taskDueDateNormal: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#64748B',
+    fontWeight: '500',
   },
 
-  // FILES STYLES
+  // FILES & FOLDER STYLES
   folderRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -3489,6 +3424,7 @@ const styles = StyleSheet.create({
   folderCount: {
     fontSize: scaleFont(10),
     color: '#64748B',
+    marginTop: 2,
   },
   fileRowCard: {
     flexDirection: 'row',
@@ -3508,163 +3444,32 @@ const styles = StyleSheet.create({
   fileDate: {
     fontSize: scaleFont(10),
     color: '#64748B',
-  },
-
-  // FEEDBACK STYLES
-  feedbackCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  adviserHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  adviserAvatarCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#BFDBFE',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  adviserNameText: {
-    fontSize: scaleFont(12),
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  adviserDateText: {
-    fontSize: scaleFont(9.5),
-    color: '#64748B',
-  },
-  ratingBadgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  overallRatingLabel: {
-    fontSize: scaleFont(11),
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  ratingValueText: {
-    fontSize: scaleFont(11),
-    color: '#16A34A',
-    fontWeight: 'bold',
-  },
-  feedbackBodyText: {
-    fontSize: scaleFont(11),
-    color: '#334155',
-    lineHeight: 16,
-  },
-  chapterTagBox: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-    marginTop: 8,
-  },
-  chapterTagTitle: {
-    fontSize: scaleFont(10),
-    color: '#475569',
-    fontWeight: '600',
-  },
-  replyBtn: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-  },
-  replyBtnText: {
-    fontSize: scaleFont(11),
-    color: '#1D61E7',
-    fontWeight: 'bold',
-  },
-  recentFeedbackCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 8,
-  },
-  feedbackCardFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  chapterSubText: {
-    fontSize: scaleFont(10),
-    color: '#64748B',
-  },
-  statusReviewedTag: {
-    fontSize: scaleFont(10),
-    color: '#16A34A',
-    fontWeight: 'bold',
-  },
-  statusRevisionsTag: {
-    fontSize: scaleFont(10),
-    color: '#DC2626',
-    fontWeight: 'bold',
-  },
-  meetingCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginTop: 8,
-  },
-  meetingFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  meetPlatformText: {
-    fontSize: scaleFont(10),
-    color: '#00832D',
-    fontWeight: '600',
-  },
-  viewDetailsBtn: {
-    backgroundColor: '#1D61E7',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  viewDetailsText: {
-    color: '#FFFFFF',
-    fontSize: scaleFont(10),
-    fontWeight: 'bold',
+    marginTop: 2,
   },
 
   // REFERENCES STYLES
   refTabsRow: {
     flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
     paddingHorizontal: 16,
-    marginBottom: 10,
-    gap: 8,
+    gap: 12,
   },
   refTabBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   refTabBtnActive: {
-    backgroundColor: '#1D61E7',
+    borderBottomColor: '#1D61E7',
   },
   refTabText: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     color: '#64748B',
     fontWeight: '500',
   },
   refTabTextActive: {
-    color: '#FFFFFF',
+    color: '#1D61E7',
     fontWeight: 'bold',
   },
   refCard: {
@@ -3673,18 +3478,18 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   refCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   refTypeBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   refTypeBadgeText: {
     fontSize: scaleFont(10),
@@ -3702,32 +3507,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   refTitle: {
-    fontSize: scaleFont(12),
+    fontSize: scaleFont(13),
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   refAuthor: {
-    fontSize: scaleFont(10),
-    color: '#475569',
-    marginBottom: 2,
+    fontSize: scaleFont(11),
+    color: '#2563EB',
+    fontWeight: '600',
+    marginBottom: 4,
   },
   refDetails: {
-    fontSize: scaleFont(9.5),
-    color: '#94A3B8',
+    fontSize: scaleFont(10),
+    color: '#64748B',
+    lineHeight: 14,
   },
 
   // GOOGLE SCHOLAR STYLES
   scholarSearchHeader: {
     paddingHorizontal: 16,
-    marginBottom: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
   },
   scholarInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F1F5F9',
     borderRadius: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     height: 40,
     gap: 8,
   },
@@ -3737,133 +3546,141 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   scholarFilterBar: {
-    marginTop: 8,
+    marginTop: 10,
+    flexDirection: 'row',
   },
   scholarFilterChip: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 14,
     backgroundColor: '#F1F5F9',
-    marginRight: 6,
+    marginRight: 8,
   },
   scholarFilterChipActive: {
     backgroundColor: '#1D61E7',
   },
   scholarFilterText: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#64748B',
+    fontWeight: '500',
   },
   scholarFilterTextActive: {
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
   scholarCard: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   scholarCardTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 4,
+    gap: 8,
   },
   scholarTitle: {
-    fontSize: scaleFont(12),
+    flex: 1,
+    fontSize: scaleFont(13),
     fontWeight: 'bold',
     color: '#1D61E7',
-    flex: 1,
-    paddingRight: 6,
+    lineHeight: 18,
   },
   pdfBadge: {
-    backgroundColor: '#EF4444',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 3,
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   pdfBadgeText: {
-    color: '#FFF',
-    fontSize: scaleFont(8.5),
+    fontSize: scaleFont(9),
+    color: '#DC2626',
     fontWeight: 'bold',
   },
   scholarAuthors: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#16A34A',
-    marginBottom: 2,
+    marginVertical: 2,
   },
   scholarPublication: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#64748B',
     marginBottom: 6,
   },
   scholarSnippet: {
-    fontSize: scaleFont(10.5),
+    fontSize: scaleFont(11),
     color: '#334155',
-    lineHeight: 15,
-    marginBottom: 8,
+    lineHeight: 16,
+    marginBottom: 10,
   },
   scholarFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
   scholarCitations: {
-    fontSize: scaleFont(9.5),
-    color: '#1D61E7',
+    fontSize: scaleFont(10),
+    color: '#64748B',
+    fontWeight: '600',
   },
   scholarImportBtn: {
-    backgroundColor: '#E0E7FF',
-    paddingHorizontal: 8,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
   },
   scholarImportBtnText: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#1D61E7',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 
-  // MODAL SCHOLAR STYLES
+  // SCHOLAR MODAL STYLES
   scholarModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     justifyContent: 'flex-end',
   },
   scholarModalContent: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 16,
+    padding: 20,
     maxHeight: '80%',
   },
   scholarModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   scholarModalHeaderTitle: {
-    fontSize: scaleFont(14),
+    fontSize: scaleFont(15),
     fontWeight: 'bold',
     color: '#0F172A',
   },
   scholarModalArticleTitle: {
-    fontSize: scaleFont(14),
+    fontSize: scaleFont(15),
     fontWeight: 'bold',
     color: '#1D61E7',
-    marginBottom: 6,
+    lineHeight: 20,
   },
   scholarModalAuthors: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     color: '#16A34A',
-    marginBottom: 2,
+    marginTop: 6,
+    fontWeight: '500',
   },
   scholarModalPub: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#64748B',
+    marginTop: 2,
   },
   scholarModalDivider: {
     height: 1,
@@ -3871,82 +3688,313 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   scholarModalSectionLabel: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   scholarModalSnippet: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     color: '#334155',
-    lineHeight: 16,
-    marginBottom: 16,
+    lineHeight: 18,
   },
   scholarModalActions: {
-    flexDirection: 'row',
-    gap: 8,
+    marginTop: 20,
+    gap: 10,
   },
   scholarModalBtn: {
-    flex: 1,
-    height: 40,
-    borderRadius: 8,
     flexDirection: 'row',
+    height: 44,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   scholarModalBtnPrimary: {
     backgroundColor: '#1D61E7',
   },
   scholarModalBtnTextPrimary: {
     color: '#FFFFFF',
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(13),
     fontWeight: 'bold',
   },
 
-  // MOCKUP BOT FAB STYLES
+  // DEFENSE PREPARATION STYLES
+  defenseCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  defenseCardTitle: {
+    fontSize: scaleFont(14),
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  defenseDateTimeRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginVertical: 10,
+  },
+  defenseDateText: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+  },
+  defenseTimeText: {
+    fontSize: scaleFont(12),
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  timerGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  timerBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    marginHorizontal: 3,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  timerVal: {
+    fontSize: scaleFont(16),
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  timerSub: {
+    fontSize: scaleFont(9),
+    color: '#64748B',
+    marginTop: 2,
+  },
+  checklistCountText: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+  },
+  checklistBarTrack: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  checklistBarFill: {
+    height: '100%',
+    backgroundColor: '#1D61E7',
+    borderRadius: 3,
+  },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    gap: 10,
+  },
+  checkText: {
+    fontSize: scaleFont(12),
+    color: '#334155',
+    flex: 1,
+  },
+
+  // ADVISER FEEDBACK STYLES
+  feedbackCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+  },
+  adviserHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  adviserAvatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#BFDBFE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  adviserNameText: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  adviserDateText: {
+    fontSize: scaleFont(10),
+    color: '#64748B',
+  },
+  ratingBadgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  overallRatingLabel: {
+    fontSize: scaleFont(11),
+    color: '#1E40AF',
+    fontWeight: '600',
+  },
+  ratingValueText: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+  },
+  feedbackBodyText: {
+    fontSize: scaleFont(11),
+    color: '#334155',
+    lineHeight: 16,
+    marginBottom: 10,
+  },
+  chapterTagBox: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  chapterTagTitle: {
+    fontSize: scaleFont(10),
+    color: '#475569',
+    fontWeight: '600',
+  },
+  replyBtn: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#1D61E7',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  replyBtnText: {
+    color: '#FFFFFF',
+    fontSize: scaleFont(11),
+    fontWeight: 'bold',
+  },
+  recentFeedbackCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  feedbackCardFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  chapterSubText: {
+    fontSize: scaleFont(11),
+    fontWeight: '600',
+    color: '#334155',
+  },
+  statusReviewedTag: {
+    fontSize: scaleFont(10),
+    color: '#16A34A',
+    fontWeight: 'bold',
+  },
+  statusRevisionsTag: {
+    fontSize: scaleFont(10),
+    color: '#D97706',
+    fontWeight: 'bold',
+  },
+  meetingCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 8,
+  },
+  meetingFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  meetPlatformText: {
+    fontSize: scaleFont(11),
+    color: '#00832D',
+    fontWeight: '600',
+  },
+  viewDetailsBtn: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  viewDetailsText: {
+    fontSize: scaleFont(10),
+    color: '#0F172A',
+    fontWeight: 'bold',
+  },
+
+  // MOCKUP FAB BOT
   mockupFabBot: {
     position: 'absolute',
     bottom: 20,
-    left: 20,
-  },
-  mockupBotCircle: {
+    right: 20,
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#1D61E7',
     elevation: 4,
+  },
+  mockupBotCircle: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   mockupBotBubble1: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#22C55E',
-  },
-  mockupBotBubble2: {
-    position: 'absolute',
-    bottom: -2,
-    left: -2,
+    top: -2,
+    right: -2,
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#3B82F6',
   },
+  mockupBotBubble2: {
+    position: 'absolute',
+    bottom: -2,
+    left: -2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#93C5FD',
+  },
 
-  // BOTTOM TAB STYLES
+  // BOTTOM TAB BAR
   bottomTabBar: {
     flexDirection: 'row',
-    height: 56,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
+    paddingVertical: 8,
     justifyContent: 'space-around',
     alignItems: 'center',
   },
@@ -3956,33 +4004,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabText: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#64748B',
     marginTop: 2,
   },
   tabTextActive: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#1D61E7',
     fontWeight: 'bold',
     marginTop: 2,
   },
 
-  // HAMBURGER MENU STYLES
+  // HAMBURGER DRAWER MODAL STYLES
   overlay: {
     flex: 1,
     flexDirection: 'row',
   },
   backdrop: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
   },
   drawer: {
-    width: '78%',
+    width: 280,
     backgroundColor: '#FFFFFF',
-    height: '100%',
     padding: 20,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 20) + 10 : 40,
+    shadowColor: '#000',
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
     elevation: 10,
   },
   backButton: {
@@ -3991,11 +4041,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginBottom: 20,
   },
   logoText: {
-    fontSize: scaleFont(18),
+    fontSize: scaleFont(20),
     fontWeight: 'bold',
     color: '#1D61E7',
   },
@@ -4006,7 +4056,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
     gap: 12,
   },
@@ -4025,12 +4075,13 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: scaleFont(12),
     color: '#EF4444',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   versionText: {
-    marginTop: 20,
     fontSize: scaleFont(10),
     color: '#94A3B8',
     textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 10,
   },
 });
