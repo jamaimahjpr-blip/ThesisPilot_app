@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { auth, GoogleAuthProvider, signInWithCredential } from '../../services/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login({ navigation }) {
+  const [email, setEmail] = useState('cooper@ipi.edu.ph');
+  const [password, setPassword] = useState('••••••••');
+
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
   });
@@ -27,6 +31,21 @@ export default function Login({ navigation }) {
     }
   }, [response]);
 
+  const handleLogin = () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter your email and password.');
+      return;
+    }
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        navigation?.navigate('Student Dashboard');
+      })
+      .catch((error) => {
+        Alert.alert('Login Failed', error.message);
+      });
+  };
+
   return (
     <View className="flex-1 bg-blue-600">
       <View className="pt-12 px-6 pb-8">
@@ -40,8 +59,11 @@ export default function Login({ navigation }) {
             <Text className="text-xs font-semibold text-gray-500 mb-1">Email</Text>
             <TextInput
               placeholder="Email"
-              defaultValue="cooper@ipi.edu.ph"
+              defaultValue={email}
+              onChangeText={setEmail}
               className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm"
+              autoCapitalize="none"
+              keyboardType="email-address"
             />
           </View>
 
@@ -50,13 +72,22 @@ export default function Login({ navigation }) {
             <TextInput
               secureTextEntry
               placeholder="Password"
-              defaultValue="••••••••"
+              defaultValue={password}
+              onChangeText={setPassword}
               className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm"
             />
+            <TouchableOpacity 
+              onPress={() => navigation?.navigate('ForgotPassword')}
+              className="mt-2 align-self-end"
+            >
+              <Text className="text-xs text-blue-600 font-semibold text-right">
+                Forgot Password?
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            onPress={() => navigation?.navigate('Student Dashboard')}
+            onPress={handleLogin}
             className="w-full py-3.5 bg-blue-600 rounded-xl items-center shadow-md mt-2"
           >
             <Text className="text-white font-bold text-base">Login</Text>
