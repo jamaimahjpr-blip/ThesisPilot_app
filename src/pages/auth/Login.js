@@ -76,7 +76,7 @@ export default function Login({ navigation }) {
               onChangeText={setPassword}
               className="w-full px-4 py-3 bg-gray-100 rounded-xl text-sm"
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => navigation?.navigate('ForgotPassword')}
               className="mt-2 align-self-end"
             >
