@@ -260,6 +260,7 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState<number>(4);
   const [currentYear, setCurrentYear] = useState<number>(2026);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
+
   const [appOpenDates] = useState<string[]>([
     '2026-05-01',
     '2026-05-03',
@@ -296,11 +297,10 @@ export default function Home() {
     }
   };
 
-  const toggleSaveScholarItem = (id: string) => {
+  const toggleSaveScholarItem = (id: string) =>
     setScholarResults((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isSaved: !item.isSaved } : item))
     );
-  };
 
   const filteredNotifications = INITIAL_NOTIFICATIONS.filter((item) => {
     if (notifFilterTab === 'Unread') return item.isUnread;
@@ -627,7 +627,8 @@ export default function Home() {
                           style={[
                             styles.roadmapConnectingLine,
                             {
-                              backgroundColor: item.status === 'completed' ? '#22C55E' : '#CBD5E1',
+                              backgroundColor:
+                                item.status === 'completed' ? '#22C55E' : '#CBD5E1',
                             },
                           ]}
                         />
@@ -1181,6 +1182,7 @@ export default function Home() {
                 contentContainerStyle={styles.workspaceScrollContent}
                 showsVerticalScrollIndicator={false}
               >
+                {/* Fixed and aligned section header for Thesis Workspace (Activity) */}
                 <View style={styles.chaptersHeaderRow}>
                   <Text style={styles.sectionHeaderTitle}>Activity</Text>
                   <TouchableOpacity style={styles.activityDropdownBtn}>
@@ -1402,7 +1404,7 @@ export default function Home() {
                       selectedDate === date && currentMonth === 4 && currentYear === 2026;
                     const monthStr = String(currentMonth + 1).padStart(2, '0');
                     const dateStr = String(date).padStart(2, '0');
-                    const formattedDate = `${currentYear}-${monthStr}-${dateStr}`;
+                    const formattedDate = `currentYear-{monthStr}-${dateStr}`;
                     const isAppOpened = appOpenDates.includes(formattedDate);
                     return (
                       <TouchableOpacity
@@ -1669,8 +1671,7 @@ export default function Home() {
                     <Text style={styles.ratingValueText}>4.5/5</Text>
                   </View>
                   <Text style={styles.feedbackBodyText}>
-                    Great progress! The literature review is comprehensive. Please improve the
-                    synthesis of related studies.
+                    Great progress! The literature review is comprehensive. Please improve the synthesis of related studies.
                   </Text>
                   <View style={styles.chapterTagBox}>
                     <Text style={styles.chapterTagTitle}>Chapter 2 - Literature Review</Text>
@@ -1697,8 +1698,7 @@ export default function Home() {
                     <Text style={styles.ratingValueText}>4.0/5</Text>
                   </View>
                   <Text style={styles.feedbackBodyText}>
-                    Good start on the methodology. Consider adding more details on your data
-                    collection process.
+                    Good start on the methodology. Consider adding more details on your data collection process.
                   </Text>
                   <View style={styles.chapterTagBox}>
                     <Text style={styles.chapterTagTitle}>Chapter 3 - Methodology</Text>
@@ -1764,9 +1764,7 @@ export default function Home() {
                     View all feedback
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.sectionHeaderTitle, { marginTop: 12 }]}>
-                  Upcoming Meetings
-                </Text>
+                <Text style={[styles.sectionHeaderTitle, { marginTop: 12 }]}>Upcoming Meetings</Text>
                 <View style={styles.meetingCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={styles.adviserAvatarCircle}>
@@ -2012,7 +2010,6 @@ export default function Home() {
             Dashboard
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2052,7 +2049,6 @@ export default function Home() {
             Workspace
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2075,7 +2071,6 @@ export default function Home() {
             Chat
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2098,7 +2093,6 @@ export default function Home() {
             Tasks
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -3386,26 +3380,24 @@ const styles = StyleSheet.create({
   },
   taskListTitle: {
     fontSize: scaleFont(12),
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#0F172A',
   },
   taskListSub: {
     fontSize: scaleFont(10),
     color: '#64748B',
-    marginTop: 2,
   },
   taskDueDateOverdue: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(10),
     color: '#EF4444',
     fontWeight: 'bold',
   },
   taskDueDateNormal: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(10),
     color: '#64748B',
-    fontWeight: '500',
   },
 
-  // FILES & FOLDER STYLES
+  // FILES STYLES
   folderRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -3424,7 +3416,6 @@ const styles = StyleSheet.create({
   folderCount: {
     fontSize: scaleFont(10),
     color: '#64748B',
-    marginTop: 2,
   },
   fileRowCard: {
     flexDirection: 'row',
@@ -3447,366 +3438,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // REFERENCES STYLES
-  refTabsRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  refTabBtn: {
-    paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  refTabBtnActive: {
-    borderBottomColor: '#1D61E7',
-  },
-  refTabText: {
-    fontSize: scaleFont(12),
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  refTabTextActive: {
-    color: '#1D61E7',
-    fontWeight: 'bold',
-  },
-  refCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  refCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  refTypeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  refTypeBadgeText: {
-    fontSize: scaleFont(10),
-    fontWeight: 'bold',
-  },
-  apaBadge: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  apaBadgeText: {
-    fontSize: scaleFont(9),
-    color: '#475569',
-    fontWeight: 'bold',
-  },
-  refTitle: {
-    fontSize: scaleFont(13),
-    fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 4,
-  },
-  refAuthor: {
-    fontSize: scaleFont(11),
-    color: '#2563EB',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  refDetails: {
-    fontSize: scaleFont(10),
-    color: '#64748B',
-    lineHeight: 14,
-  },
-
-  // GOOGLE SCHOLAR STYLES
-  scholarSearchHeader: {
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  scholarInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 40,
-    gap: 8,
-  },
-  scholarInput: {
-    flex: 1,
-    fontSize: scaleFont(12),
-    color: '#0F172A',
-  },
-  scholarFilterBar: {
-    marginTop: 10,
-    flexDirection: 'row',
-  },
-  scholarFilterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
-    backgroundColor: '#F1F5F9',
-    marginRight: 8,
-  },
-  scholarFilterChipActive: {
-    backgroundColor: '#1D61E7',
-  },
-  scholarFilterText: {
-    fontSize: scaleFont(11),
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  scholarFilterTextActive: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  scholarCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  scholarCardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  scholarTitle: {
-    flex: 1,
-    fontSize: scaleFont(13),
-    fontWeight: 'bold',
-    color: '#1D61E7',
-    lineHeight: 18,
-  },
-  pdfBadge: {
-    backgroundColor: '#FEE2E2',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  pdfBadgeText: {
-    fontSize: scaleFont(9),
-    color: '#DC2626',
-    fontWeight: 'bold',
-  },
-  scholarAuthors: {
-    fontSize: scaleFont(11),
-    color: '#16A34A',
-    marginVertical: 2,
-  },
-  scholarPublication: {
-    fontSize: scaleFont(10),
-    color: '#64748B',
-    marginBottom: 6,
-  },
-  scholarSnippet: {
-    fontSize: scaleFont(11),
-    color: '#334155',
-    lineHeight: 16,
-    marginBottom: 10,
-  },
-  scholarFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-  },
-  scholarCitations: {
-    fontSize: scaleFont(10),
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  scholarImportBtn: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  scholarImportBtnText: {
-    fontSize: scaleFont(10),
-    color: '#1D61E7',
-    fontWeight: 'bold',
-  },
-
-  // SCHOLAR MODAL STYLES
-  scholarModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    justifyContent: 'flex-end',
-  },
-  scholarModalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
-  },
-  scholarModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  scholarModalHeaderTitle: {
-    fontSize: scaleFont(15),
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  scholarModalArticleTitle: {
-    fontSize: scaleFont(15),
-    fontWeight: 'bold',
-    color: '#1D61E7',
-    lineHeight: 20,
-  },
-  scholarModalAuthors: {
-    fontSize: scaleFont(12),
-    color: '#16A34A',
-    marginTop: 6,
-    fontWeight: '500',
-  },
-  scholarModalPub: {
-    fontSize: scaleFont(11),
-    color: '#64748B',
-    marginTop: 2,
-  },
-  scholarModalDivider: {
-    height: 1,
-    backgroundColor: '#E2E8F0',
-    marginVertical: 12,
-  },
-  scholarModalSectionLabel: {
-    fontSize: scaleFont(12),
-    fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 6,
-  },
-  scholarModalSnippet: {
-    fontSize: scaleFont(12),
-    color: '#334155',
-    lineHeight: 18,
-  },
-  scholarModalActions: {
-    marginTop: 20,
-    gap: 10,
-  },
-  scholarModalBtn: {
-    flexDirection: 'row',
-    height: 44,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  scholarModalBtnPrimary: {
-    backgroundColor: '#1D61E7',
-  },
-  scholarModalBtnTextPrimary: {
-    color: '#FFFFFF',
-    fontSize: scaleFont(13),
-    fontWeight: 'bold',
-  },
-
-  // DEFENSE PREPARATION STYLES
-  defenseCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 14,
-  },
-  defenseCardTitle: {
-    fontSize: scaleFont(14),
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  defenseDateTimeRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginVertical: 10,
-  },
-  defenseDateText: {
-    fontSize: scaleFont(12),
-    fontWeight: 'bold',
-    color: '#1D61E7',
-  },
-  defenseTimeText: {
-    fontSize: scaleFont(12),
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  timerGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 6,
-  },
-  timerBox: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    marginHorizontal: 3,
-    borderRadius: 10,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-  },
-  timerVal: {
-    fontSize: scaleFont(16),
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  timerSub: {
-    fontSize: scaleFont(9),
-    color: '#64748B',
-    marginTop: 2,
-  },
-  checklistCountText: {
-    fontSize: scaleFont(12),
-    fontWeight: 'bold',
-    color: '#1D61E7',
-  },
-  checklistBarTrack: {
-    height: 6,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  checklistBarFill: {
-    height: '100%',
-    backgroundColor: '#1D61E7',
-    borderRadius: 3,
-  },
-  checkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    gap: 10,
-  },
-  checkText: {
-    fontSize: scaleFont(12),
-    color: '#334155',
-    flex: 1,
-  },
-
-  // ADVISER FEEDBACK STYLES
+  // FEEDBACK STYLES
   feedbackCard: {
     backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     marginBottom: 12,
@@ -3814,7 +3450,7 @@ const styles = StyleSheet.create({
   adviserHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   adviserAvatarCircle: {
     width: 32,
@@ -3830,7 +3466,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   adviserDateText: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(9.5),
     color: '#64748B',
   },
   ratingBadgeRow: {
@@ -3838,50 +3474,50 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#EFF6FF',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginBottom: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 8,
   },
   overallRatingLabel: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(10),
     color: '#1E40AF',
     fontWeight: '600',
   },
   ratingValueText: {
-    fontSize: scaleFont(12),
+    fontSize: scaleFont(10),
+    color: '#1E40AF',
     fontWeight: 'bold',
-    color: '#1D61E7',
   },
   feedbackBodyText: {
     fontSize: scaleFont(11),
     color: '#334155',
     lineHeight: 16,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   chapterTagBox: {
     alignSelf: 'flex-start',
     backgroundColor: '#E2E8F0',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 10,
+    paddingVertical: 3,
+    borderRadius: 4,
+    marginBottom: 8,
   },
   chapterTagTitle: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(9.5),
     color: '#475569',
     fontWeight: '600',
   },
   replyBtn: {
     alignSelf: 'flex-end',
     backgroundColor: '#1D61E7',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 6,
   },
   replyBtnText: {
     color: '#FFFFFF',
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(10),
     fontWeight: 'bold',
   },
   recentFeedbackCard: {
@@ -3897,23 +3533,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
   },
   chapterSubText: {
-    fontSize: scaleFont(11),
-    fontWeight: '600',
-    color: '#334155',
+    fontSize: scaleFont(10),
+    color: '#64748B',
+    fontWeight: '500',
   },
   statusReviewedTag: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(9.5),
     color: '#16A34A',
     fontWeight: 'bold',
   },
   statusRevisionsTag: {
-    fontSize: scaleFont(10),
-    color: '#D97706',
+    fontSize: scaleFont(9.5),
+    color: '#DC2626',
     fontWeight: 'bold',
   },
   meetingCard: {
@@ -3929,13 +3562,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
   },
   meetPlatformText: {
-    fontSize: scaleFont(11),
-    color: '#00832D',
+    fontSize: scaleFont(10),
+    color: '#475569',
     fontWeight: '600',
   },
   viewDetailsBtn: {
@@ -3947,32 +3577,113 @@ const styles = StyleSheet.create({
   viewDetailsText: {
     fontSize: scaleFont(10),
     color: '#0F172A',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 
-  // MOCKUP FAB BOT
+  // REFERENCES STYLES
+  refTabsRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    marginHorizontal: 16,
+  },
+  refTabBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  refTabBtnActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#1D61E7',
+  },
+  refTabText: {
+    fontSize: scaleFont(11),
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  refTabTextActive: {
+    color: '#1D61E7',
+    fontWeight: 'bold',
+  },
+  refCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  refCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  refTypeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  refTypeBadgeText: {
+    fontSize: scaleFont(9.5),
+    fontWeight: 'bold',
+  },
+  apaBadge: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  apaBadgeText: {
+    fontSize: scaleFont(9),
+    color: '#475569',
+    fontWeight: '600',
+  },
+  refTitle: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  refAuthor: {
+    fontSize: scaleFont(10),
+    color: '#475569',
+    marginBottom: 2,
+  },
+  refDetails: {
+    fontSize: scaleFont(9.5),
+    color: '#64748B',
+    fontStyle: 'italic',
+  },
   mockupFabBot: {
     position: 'absolute',
     bottom: 20,
-    right: 20,
+    left: 20,
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    zIndex: 10,
   },
   mockupBotCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   mockupBotBubble1: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: 4,
+    right: 4,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -3980,63 +3691,330 @@ const styles = StyleSheet.create({
   },
   mockupBotBubble2: {
     position: 'absolute',
-    bottom: -2,
-    left: -2,
+    bottom: 6,
+    left: 6,
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#93C5FD',
+    backgroundColor: '#60A5FA',
   },
 
-  // BOTTOM TAB BAR
+  // GOOGLE SCHOLAR STYLES
+  scholarSearchHeader: {
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  scholarInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 40,
+    gap: 8,
+  },
+  scholarInput: {
+    flex: 1,
+    fontSize: scaleFont(11),
+    color: '#0F172A',
+  },
+  scholarFilterBar: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  scholarFilterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    marginRight: 8,
+  },
+  scholarFilterChipActive: {
+    backgroundColor: '#1D61E7',
+  },
+  scholarFilterText: {
+    fontSize: scaleFont(10),
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  scholarFilterTextActive: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  scholarCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  scholarCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  scholarTitle: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+    flex: 1,
+  },
+  pdfBadge: {
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  pdfBadgeText: {
+    fontSize: scaleFont(9),
+    color: '#DC2626',
+    fontWeight: 'bold',
+  },
+  scholarAuthors: {
+    fontSize: scaleFont(10),
+    color: '#16A34A',
+    marginTop: 2,
+  },
+  scholarPublication: {
+    fontSize: scaleFont(9.5),
+    color: '#64748B',
+    marginBottom: 6,
+  },
+  scholarSnippet: {
+    fontSize: scaleFont(10.5),
+    color: '#334155',
+    lineHeight: 15,
+    marginBottom: 8,
+  },
+  scholarFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 8,
+  },
+  scholarCitations: {
+    fontSize: scaleFont(10),
+    color: '#1D61E7',
+    fontWeight: '500',
+  },
+  scholarImportBtn: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  scholarImportBtnText: {
+    fontSize: scaleFont(9.5),
+    color: '#1D61E7',
+    fontWeight: '600',
+  },
+
+  // SCHOLAR MODAL STYLES
+  scholarModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  scholarModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  scholarModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  scholarModalHeaderTitle: {
+    fontSize: scaleFont(14),
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  scholarModalArticleTitle: {
+    fontSize: scaleFont(14),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+    marginBottom: 6,
+  },
+  scholarModalAuthors: {
+    fontSize: scaleFont(11),
+    color: '#16A34A',
+    marginBottom: 2,
+  },
+  scholarModalPub: {
+    fontSize: scaleFont(10),
+    color: '#64748B',
+  },
+  scholarModalDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 12,
+  },
+  scholarModalSectionLabel: {
+    fontSize: scaleFont(11),
+    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  scholarModalSnippet: {
+    fontSize: scaleFont(11),
+    color: '#334155',
+    lineHeight: 16,
+    marginBottom: 16,
+  },
+  scholarModalActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  scholarModalBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    height: 40,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+  },
+  scholarModalBtnPrimary: {
+    backgroundColor: '#1D61E7',
+  },
+  scholarModalBtnTextPrimary: {
+    color: '#FFFFFF',
+    fontSize: scaleFont(11),
+    fontWeight: 'bold',
+  },
+
+  // DEFENSE PREP STYLES
+  defenseCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+  },
+  defenseCardTitle: {
+    fontSize: scaleFont(13),
+    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  defenseDateTimeRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 12,
+  },
+  defenseDateText: {
+    fontSize: scaleFont(11),
+    color: '#1D61E7',
+    fontWeight: '600',
+  },
+  defenseTimeText: {
+    fontSize: scaleFont(11),
+    color: '#64748B',
+  },
+  timerGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
+  timerBox: {
+    flex: 1,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  timerVal: {
+    fontSize: scaleFont(16),
+    fontWeight: 'bold',
+    color: '#1D61E7',
+  },
+  timerSub: {
+    fontSize: scaleFont(8.5),
+    color: '#64748B',
+    marginTop: 2,
+  },
+  checklistCountText: {
+    fontSize: scaleFont(11),
+    color: '#1D61E7',
+    fontWeight: 'bold',
+  },
+  checklistBarTrack: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  checklistBarFill: {
+    height: '100%',
+    backgroundColor: '#1D61E7',
+    borderRadius: 3,
+  },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 6,
+  },
+  checkText: {
+    fontSize: scaleFont(11),
+    color: '#334155',
+  },
+
+  // BOTTOM TAB BAR STYLES
   bottomTabBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
-    paddingVertical: 8,
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    paddingVertical: 6,
+    height: 56,
   },
   tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabText: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(9.5),
     color: '#64748B',
     marginTop: 2,
   },
   tabTextActive: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(9.5),
     color: '#1D61E7',
     fontWeight: 'bold',
     marginTop: 2,
   },
 
-  // HAMBURGER DRAWER MODAL STYLES
+  // HAMBURGER MENU MODAL STYLES
   overlay: {
     flex: 1,
     flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
   },
   drawer: {
-    width: 280,
+    width: SCREEN_WIDTH * 0.75,
     backgroundColor: '#FFFFFF',
-    padding: 20,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 20) + 10 : 40,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
   backButton: {
-    marginBottom: 16,
+    paddingVertical: 8,
+    marginBottom: 8,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -4081,7 +4059,6 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(10),
     color: '#94A3B8',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 24,
   },
 });
