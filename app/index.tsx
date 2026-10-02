@@ -180,10 +180,16 @@ const INITIAL_SCHOLAR_RESULTS: ScholarSearchItem[] = [
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgotPassword'>('login');
+  
+  // Auth Form States
   const [username, setUsername] = useState('Cooper');
   const [fullName, setFullName] = useState('Cooper Vance');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('Student');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -215,7 +221,29 @@ export default function Home() {
     }
   };
 
+  const handleSignUp = async () => {
+    if (username.trim() && password.trim()) {
+      try {
+        const userData = { username, fullName, role, email };
+        await AsyncStorage.setItem('@user_data', JSON.stringify(userData));
+        setIsLoggedIn(true);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleForgotPassword = () => {
+    alert('Password reset link sent to your email.');
+    setAuthView('login');
+  };
+
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
     setIsLoggedIn(false);
     setIsMenuOpen(false);
   };
@@ -238,7 +266,6 @@ export default function Home() {
   const [scholarFilter, setScholarFilter] = useState<'Any time' | 'Since 2023' | 'Since 2026'>('Any time');
   const [scholarResults, setScholarResults] = useState<ScholarSearchItem[]>(INITIAL_SCHOLAR_RESULTS);
   const [selectedPaper, setSelectedPaper] = useState<ScholarSearchItem | null>(null);
-
   const [checklist, setChecklist] = useState([
     { id: '1', title: 'Finalize thesis manuscript', checked: true },
     { id: '2', title: 'Finalize thesis manuscript', checked: true },
@@ -260,7 +287,6 @@ export default function Home() {
   const [currentMonth, setCurrentMonth] = useState<number>(4);
   const [currentYear, setCurrentYear] = useState<number>(2026);
   const [isYearPickerVisible, setIsYearPickerVisible] = useState(false);
-
   const [appOpenDates] = useState<string[]>([
     '2026-05-01',
     '2026-05-03',
@@ -297,10 +323,11 @@ export default function Home() {
     }
   };
 
-  const toggleSaveScholarItem = (id: string) =>
+  const toggleSaveScholarItem = (id: string) => {
     setScholarResults((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isSaved: !item.isSaved } : item))
     );
+  };
 
   const filteredNotifications = INITIAL_NOTIFICATIONS.filter((item) => {
     if (notifFilterTab === 'Unread') return item.isUnread;
@@ -315,28 +342,16 @@ export default function Home() {
     return item.type === refTab;
   });
 
-  const renderNotifIcon = (type: NotificationItem['iconType'], color: string) => {
+  const renderNotificon = (type: NotificationItem['iconType'], color: string) => {
     switch (type) {
       case 'person':
         return <Ionicons name="person" size={scaleFont(22)} color={color} />;
       case 'task':
-        return (
-          <MaterialCommunityIcons
-            name="clipboard-check-outline"
-            size={scaleFont(20)}
-            color={color}
-          />
-        );
+        return <MaterialCommunityIcons name="clipboard-check-outline" size={scaleFont(20)} color={color} />;
       case 'calendar':
         return <Feather name="calendar" size={scaleFont(20)} color={color} />;
       case 'ai':
-        return (
-          <MaterialCommunityIcons
-            name="robot-outline"
-            size={scaleFont(20)}
-            color={color}
-          />
-        );
+        return <MaterialCommunityIcons name="robot-outline" size={scaleFont(20)} color={color} />;
       case 'scholar':
         return <Ionicons name="school-outline" size={scaleFont(20)} color={color} />;
       default:
@@ -348,10 +363,7 @@ export default function Home() {
     return (
       <SafeAreaView style={styles.loginContainer}>
         <StatusBar barStyle="light-content" backgroundColor="#1D61E7" />
-        <ScrollView
-          contentContainerStyle={styles.loginScrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.loginScrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.loginHeaderSection}>
             <View style={styles.loginIconBox}>
               <Ionicons name="school" size={scaleFont(40)} color="#1D61E7" />
@@ -359,60 +371,187 @@ export default function Home() {
             <Text style={styles.loginAppTitle}>Thesis Pilot</Text>
             <Text style={styles.loginSubtitle}>Your AI-Powered Academic Companion</Text>
           </View>
-          <View style={styles.loginCard}>
-            <Text style={styles.loginCardTitle}>Sign In</Text>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Username or Email</Text>
-              <View style={styles.textInputWrapper}>
-                <Ionicons name="person-outline" size={scaleFont(18)} color="#64748B" />
-                <TextInput
-                  style={styles.textInput}
-                  value={username}
-                  onChangeText={setUsername}
-                  placeholder="Enter username"
-                  placeholderTextColor="#94A3B8"
-                  autoCapitalize="none"
-                />
+
+          {/* SIGN IN VIEW */}
+          {authView === 'login' && (
+            <View style={styles.loginCard}>
+              <Text style={styles.loginCardTitle}>Sign In</Text>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Username or Email</Text>
+                <View style={styles.textInputWrapper}>
+                  <Ionicons name="person-outline" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="Enter username"
+                    placeholderTextColor="#94A3B8"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.textInputWrapper}>
+                  <Feather name="lock" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="••••••••"
+                    placeholderTextColor="#94A3B8"
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.forgotBtn} onPress={() => setAuthView('forgotPassword')}>
+                <Text style={styles.forgotBtnText}>Forgot Password?</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.loginSubmitBtn} onPress={handleLogin} activeOpacity={0.8}>
+                <Text style={styles.loginSubmitBtnText}>Log In</Text>
+              </TouchableOpacity>
+
+              <View style={styles.authSwitchRow}>
+                <Text style={styles.authSwitchText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => setAuthView('signup')}>
+                  <Text style={styles.authSwitchLink}>Sign Up</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Full Name</Text>
-              <View style={styles.textInputWrapper}>
-                <Ionicons name="card-outline" size={scaleFont(18)} color="#64748B" />
-                <TextInput
-                  style={styles.textInput}
-                  value={fullName}
-                  onChangeText={setFullName}
-                  placeholder="Enter full name"
-                  placeholderTextColor="#94A3B8"
-                />
+          )}
+
+          {/* SIGN UP VIEW */}
+          {authView === 'signup' && (
+            <View style={styles.loginCard}>
+              <Text style={styles.loginCardTitle}>Create Account</Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Full Name</Text>
+                <View style={styles.textInputWrapper}>
+                  <Ionicons name="card-outline" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholder="Enter full name"
+                    placeholderTextColor="#94A3B8"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Username</Text>
+                <View style={styles.textInputWrapper}>
+                  <Ionicons name="person-outline" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="Choose username"
+                    placeholderTextColor="#94A3B8"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <View style={styles.textInputWrapper}>
+                  <Ionicons name="mail-outline" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter email address"
+                    placeholderTextColor="#94A3B8"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.textInputWrapper}>
+                  <Feather name="lock" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="Create password"
+                    placeholderTextColor="#94A3B8"
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Confirm Password</Text>
+                <View style={styles.textInputWrapper}>
+                  <Feather name="lock" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    placeholder="Confirm password"
+                    placeholderTextColor="#94A3B8"
+                    secureTextEntry
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.loginSubmitBtn} onPress={handleSignUp} activeOpacity={0.8}>
+                <Text style={styles.loginSubmitBtnText}>Sign Up</Text>
+              </TouchableOpacity>
+
+              <View style={styles.authSwitchRow}>
+                <Text style={styles.authSwitchText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => setAuthView('login')}>
+                  <Text style={styles.authSwitchLink}>Sign In</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <View style={styles.textInputWrapper}>
-                <Feather name="lock" size={scaleFont(18)} color="#64748B" />
-                <TextInput
-                  style={styles.textInput}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="........"
-                  placeholderTextColor="#94A3B8"
-                  secureTextEntry
-                />
+          )}
+
+          {/* FORGOT PASSWORD VIEW */}
+          {authView === 'forgotPassword' && (
+            <View style={styles.loginCard}>
+              <Text style={styles.loginCardTitle}>Reset Password</Text>
+              <Text style={styles.forgotInstruction}>
+                Enter your email address and we'll send you instructions to reset your password.
+              </Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <View style={styles.textInputWrapper}>
+                  <Ionicons name="mail-outline" size={scaleFont(18)} color="#64748B" />
+                  <TextInput
+                    style={styles.textInput}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#94A3B8"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.loginSubmitBtn} onPress={handleForgotPassword} activeOpacity={0.8}>
+                <Text style={styles.loginSubmitBtnText}>Send Reset Link</Text>
+              </TouchableOpacity>
+
+              <View style={styles.authSwitchRow}>
+                <TouchableOpacity onPress={() => setAuthView('login')}>
+                  <Text style={styles.authSwitchLink}>Back to Sign In</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.loginSubmitBtn}
-              onPress={handleLogin}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.loginSubmitBtnText}>Log In</Text>
-            </TouchableOpacity>
-            <View style={styles.loginFooterRow}>
-              <Text style={styles.loginFooterText}>Saved credentials are stored locally</Text>
-            </View>
-          </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     );
@@ -539,7 +678,7 @@ export default function Home() {
                 {todayNotifications.map((item) => (
                   <View key={item.id} style={styles.notifCard}>
                     <View style={[styles.notifIconContainer, { backgroundColor: item.iconBgColor }]}>
-                      {renderNotifIcon(item.iconType, item.iconColor)}
+                      {renderNotificon(item.iconType, item.iconColor)}
                     </View>
                     <View style={styles.notifTextContainer}>
                       <View style={styles.notifCardHeaderRow}>
@@ -564,7 +703,7 @@ export default function Home() {
                 {yesterdayNotifications.map((item) => (
                   <View key={item.id} style={styles.notifCard}>
                     <View style={[styles.notifIconContainer, { backgroundColor: item.iconBgColor }]}>
-                      {renderNotifIcon(item.iconType, item.iconColor)}
+                      {renderNotificon(item.iconType, item.iconColor)}
                     </View>
                     <View style={styles.notifTextContainer}>
                       <View style={styles.notifCardHeaderRow}>
@@ -626,10 +765,7 @@ export default function Home() {
                         <View
                           style={[
                             styles.roadmapConnectingLine,
-                            {
-                              backgroundColor:
-                                item.status === 'completed' ? '#22C55E' : '#CBD5E1',
-                            },
+                            { backgroundColor: item.status === 'completed' ? '#22C55E' : '#CBD5E1' },
                           ]}
                         />
                       )}
@@ -677,10 +813,7 @@ export default function Home() {
               </TouchableOpacity>
             ))}
           </View>
-          <ScrollView
-            contentContainerStyle={styles.workspaceScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
             {filteredReferences.map((ref) => (
               <View key={ref.id} style={styles.refCard}>
                 <View style={styles.refCardHeader}>
@@ -754,11 +887,7 @@ export default function Home() {
                 </TouchableOpacity>
               )}
             </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.scholarFilterBar}
-            >
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scholarFilterBar}>
               {(['Any time', 'Since 2023', 'Since 2026'] as const).map((filter) => (
                 <TouchableOpacity
                   key={filter}
@@ -780,10 +909,7 @@ export default function Home() {
               ))}
             </ScrollView>
           </View>
-          <ScrollView
-            contentContainerStyle={styles.workspaceScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
             {scholarResults.map((item) => (
               <TouchableOpacity
                 key={item.id}
@@ -859,9 +985,7 @@ export default function Home() {
                       >
                         <Ionicons name="add-circle-outline" size={scaleFont(18)} color="#FFF" />
                         <Text style={styles.scholarModalBtnTextPrimary}>
-                          {selectedPaper.isSaved
-                            ? 'In References'
-                            : 'Save to Reference Manager'}
+                          {selectedPaper.isSaved ? 'In References' : 'Save to Reference Manager'}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -876,10 +1000,7 @@ export default function Home() {
         </View>
       ) : currentView === 'defensePrep' ? (
         <View style={styles.workspaceContainer}>
-          <ScrollView
-            contentContainerStyle={styles.workspaceScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.defenseCard}>
               <Text style={styles.defenseCardTitle}>Your Defense</Text>
               <View style={styles.defenseDateTimeRow}>
@@ -912,13 +1033,7 @@ export default function Home() {
               </View>
             </View>
             <View style={styles.defenseCard}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={styles.defenseCardTitle}>Checklist</Text>
                 <Text style={styles.checklistCountText}>
                   {checklist.filter((c) => c.checked).length}/{checklist.length}
@@ -928,9 +1043,7 @@ export default function Home() {
                 <View
                   style={[
                     styles.checklistBarFill,
-                    {
-                      width: `${(checklist.filter((c) => c.checked).length / checklist.length) * 100}%`,
-                    },
+                    { width: `${(checklist.filter((c) => c.checked).length / checklist.length) * 100}%` },
                   ]}
                 />
               </View>
@@ -995,15 +1108,12 @@ export default function Home() {
           </View>
           <View style={{ flex: 1 }}>
             {workspaceSubTab === 'Overview' && (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.overviewBox}>
                   <Text style={styles.overviewBoxTitle}>About this thesis</Text>
                   <Text style={styles.overviewBoxDesc}>
-                    This study explores the impact of Artificial Intelligence (AI) tools on the
-                    academic performance and learning experience of college students.
+                    This study explores the impact of Artificial Intelligence (AI) tools on the academic
+                    performance and learning experience of college students.
                   </Text>
                 </View>
                 <View style={styles.overviewBox}>
@@ -1038,10 +1148,7 @@ export default function Home() {
               </ScrollView>
             )}
             {workspaceSubTab === 'Chapters' && (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.chaptersHeaderRow}>
                   <Text style={styles.sectionHeaderTitle}>Chapters</Text>
                   <TouchableOpacity style={styles.addChapterBtn}>
@@ -1094,10 +1201,7 @@ export default function Home() {
               </ScrollView>
             )}
             {workspaceSubTab === 'Notes' && (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.chaptersHeaderRow}>
                   <Text style={styles.sectionHeaderTitle}>Notes</Text>
                   <TouchableOpacity style={styles.addChapterBtn}>
@@ -1120,11 +1224,7 @@ export default function Home() {
                 </View>
                 <View style={styles.noteItemCard}>
                   <View style={styles.noteIconBox}>
-                    <MaterialCommunityIcons
-                      name="file-document-outline"
-                      size={scaleFont(22)}
-                      color="#15803D"
-                    />
+                    <MaterialCommunityIcons name="file-document-outline" size={scaleFont(22)} color="#15803D" />
                   </View>
                   <View style={styles.noteContent}>
                     <View style={styles.noteTitleRow}>
@@ -1139,11 +1239,7 @@ export default function Home() {
                 </View>
                 <View style={styles.noteItemCard}>
                   <View style={styles.noteIconBox}>
-                    <MaterialCommunityIcons
-                      name="file-document-outline"
-                      size={scaleFont(22)}
-                      color="#15803D"
-                    />
+                    <MaterialCommunityIcons name="file-document-outline" size={scaleFont(22)} color="#15803D" />
                   </View>
                   <View style={styles.noteContent}>
                     <View style={styles.noteTitleRow}>
@@ -1158,11 +1254,7 @@ export default function Home() {
                 </View>
                 <View style={styles.noteItemCard}>
                   <View style={styles.noteIconBox}>
-                    <MaterialCommunityIcons
-                      name="file-document-outline"
-                      size={scaleFont(22)}
-                      color="#15803D"
-                    />
+                    <MaterialCommunityIcons name="file-document-outline" size={scaleFont(22)} color="#15803D" />
                   </View>
                   <View style={styles.noteContent}>
                     <View style={styles.noteTitleRow}>
@@ -1178,11 +1270,7 @@ export default function Home() {
               </ScrollView>
             )}
             {workspaceSubTab === 'Activity' && (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
-                {/* Fixed and aligned section header for Thesis Workspace (Activity) */}
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.chaptersHeaderRow}>
                   <Text style={styles.sectionHeaderTitle}>Activity</Text>
                   <TouchableOpacity style={styles.activityDropdownBtn}>
@@ -1277,11 +1365,7 @@ export default function Home() {
                   <View style={styles.timelineItem}>
                     <View style={styles.timelineLeftColumn}>
                       <View style={styles.timelineDotIconNote}>
-                        <MaterialCommunityIcons
-                          name="file-document-outline"
-                          size={scaleFont(12)}
-                          color="#15803D"
-                        />
+                        <MaterialCommunityIcons name="file-document-outline" size={scaleFont(12)} color="#15803D" />
                       </View>
                     </View>
                     <View style={styles.timelineContent}>
@@ -1327,18 +1411,11 @@ export default function Home() {
           </View>
           <View style={{ flex: 1 }}>
             {taskSubTab === 'Calendar' ? (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 {isYearPickerVisible ? (
                   <View style={styles.yearPickerContainer}>
                     <Text style={styles.yearPickerTitle}>Select Year</Text>
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.yearScrollView}
-                    >
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.yearScrollView}>
                       {[2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030].map((year) => (
                         <TouchableOpacity
                           key={year}
@@ -1375,12 +1452,7 @@ export default function Home() {
                     <Text style={styles.calendarMonthTitle}>
                       {monthsList[currentMonth]} {currentYear}
                     </Text>
-                    <Ionicons
-                      name="caret-down"
-                      size={scaleFont(12)}
-                      color="#1D61E7"
-                      style={{ marginLeft: 4 }}
-                    />
+                    <Ionicons name="caret-down" size={scaleFont(12)} color="#1D61E7" style={{ marginLeft: 4 }} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={handleNextMonth} style={styles.calNavBtn}>
                     <Ionicons name="chevron-forward" size={scaleFont(18)} color="#1D61E7" />
@@ -1400,11 +1472,10 @@ export default function Home() {
                     </Text>
                   ))}
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((date) => {
-                    const isSelected =
-                      selectedDate === date && currentMonth === 4 && currentYear === 2026;
+                    const isSelected = selectedDate === date && currentMonth === 4 && currentYear === 2026;
                     const monthStr = String(currentMonth + 1).padStart(2, '0');
                     const dateStr = String(date).padStart(2, '0');
-                    const formattedDate = `currentYear-{monthStr}-${dateStr}`;
+                    const formattedDate = `${currentYear}-${monthStr}-${dateStr}`;
                     const isAppOpened = appOpenDates.includes(formattedDate);
                     return (
                       <TouchableOpacity
@@ -1475,10 +1546,7 @@ export default function Home() {
                 </View>
               </ScrollView>
             ) : (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.taskSectionRow}>
                   <Text style={styles.taskSectionHeader}>Overdue</Text>
                   <TouchableOpacity style={styles.addTaskBtn}>
@@ -1537,10 +1605,7 @@ export default function Home() {
         </View>
       ) : activeTab === 'Files' ? (
         <View style={styles.workspaceContainer}>
-          <ScrollView
-            contentContainerStyle={styles.workspaceScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.notesSearchRow}>
               <View style={styles.notesSearchBox}>
                 <Ionicons name="search-outline" size={scaleFont(16)} color="#64748B" />
@@ -1649,10 +1714,7 @@ export default function Home() {
           </View>
           <View style={{ flex: 1 }}>
             {feedbackSubTab === 'Feedback' ? (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.feedbackCard}>
                   <View style={styles.adviserHeaderRow}>
                     <View style={styles.adviserAvatarCircle}>
@@ -1671,7 +1733,8 @@ export default function Home() {
                     <Text style={styles.ratingValueText}>4.5/5</Text>
                   </View>
                   <Text style={styles.feedbackBodyText}>
-                    Great progress! The literature review is comprehensive. Please improve the synthesis of related studies.
+                    Great progress! The literature review is comprehensive. Please improve the synthesis of related
+                    studies.
                   </Text>
                   <View style={styles.chapterTagBox}>
                     <Text style={styles.chapterTagTitle}>Chapter 2 - Literature Review</Text>
@@ -1709,10 +1772,7 @@ export default function Home() {
                 </View>
               </ScrollView>
             ) : (
-              <ScrollView
-                contentContainerStyle={styles.workspaceScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={styles.workspaceScrollContent} showsVerticalScrollIndicator={false}>
                 <Text style={styles.sectionHeaderTitle}>Recent Feedback</Text>
                 <View style={styles.recentFeedbackCard}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1794,12 +1854,7 @@ export default function Home() {
         </View>
       ) : (
         /* DASHBOARD CONTENT */
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          {/* Fixed aligned greeting header for Student Dashboard */}
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} bounces={false}>
           <View style={styles.greetingContainer}>
             <View style={{ flex: 1, paddingRight: 8 }}>
               <Text style={styles.greetingTitle} numberOfLines={1}>
@@ -1870,12 +1925,7 @@ export default function Home() {
                 <Text style={[styles.milestonePercent, { color: '#10B981' }]}>100%</Text>
               </View>
               <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: '100%', backgroundColor: '#10B981' },
-                  ]}
-                />
+                <View style={[styles.progressBarFill, { width: '100%', backgroundColor: '#10B981' }]} />
               </View>
             </View>
             <View style={styles.milestoneItem}>
@@ -1884,12 +1934,7 @@ export default function Home() {
                 <Text style={styles.milestonePercent}>75%</Text>
               </View>
               <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: '75%', backgroundColor: '#0F172A' },
-                  ]}
-                />
+                <View style={[styles.progressBarFill, { width: '75%', backgroundColor: '#0F172A' }]} />
               </View>
             </View>
             <View style={styles.milestoneItem}>
@@ -1898,12 +1943,7 @@ export default function Home() {
                 <Text style={styles.milestonePercent}>40%</Text>
               </View>
               <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: '40%', backgroundColor: '#1E3A8A' },
-                  ]}
-                />
+                <View style={[styles.progressBarFill, { width: '40%', backgroundColor: '#1E3A8A' }]} />
               </View>
             </View>
             <View style={styles.milestoneItem}>
@@ -1912,12 +1952,7 @@ export default function Home() {
                 <Text style={styles.milestonePercent}>20%</Text>
               </View>
               <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: '20%', backgroundColor: '#2563EB' },
-                  ]}
-                />
+                <View style={[styles.progressBarFill, { width: '20%', backgroundColor: '#2563EB' }]} />
               </View>
             </View>
             <View style={styles.milestoneItem}>
@@ -1926,12 +1961,7 @@ export default function Home() {
                 <Text style={styles.milestonePercent}>0%</Text>
               </View>
               <View style={styles.progressBarTrack}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: '0%', backgroundColor: '#2563EB' },
-                  ]}
-                />
+                <View style={[styles.progressBarFill, { width: '0%', backgroundColor: '#2563EB' }]} />
               </View>
             </View>
           </View>
@@ -2010,6 +2040,7 @@ export default function Home() {
             Dashboard
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2049,6 +2080,7 @@ export default function Home() {
             Workspace
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2071,6 +2103,7 @@ export default function Home() {
             Chat
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2093,6 +2126,7 @@ export default function Home() {
             Tasks
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => {
@@ -2117,7 +2151,28 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      {/* 4. HAMBURGER SIDEBAR MODAL */}
+      {/* 4. LOGOUT CONFIRMATION MODAL */}
+      <Modal visible={showLogoutModal} transparent animationType="fade">
+        <View style={styles.logoutModalOverlay}>
+          <View style={styles.logoutModalCard}>
+            <Text style={styles.logoutModalTitle}>Logout</Text>
+            <Text style={styles.logoutModalSubtitle}>Are you sure you want to log out of your account?</Text>
+            <View style={styles.logoutModalActions}>
+              <TouchableOpacity
+                style={styles.logoutCancelBtn}
+                onPress={() => setShowLogoutModal(false)}
+              >
+                <Text style={styles.logoutCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.logoutConfirmBtn} onPress={confirmLogout}>
+                <Text style={styles.logoutConfirmBtnText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 5. HAMBURGER SIDEBAR MODAL */}
       <HamburgerMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -2161,6 +2216,7 @@ function HamburgerMenu({
               <Ionicons name="school" size={scaleFont(32)} color="#1D61E7" />
               <Text style={styles.logoText}>ThesisPilot</Text>
             </View>
+
             <View style={styles.menuList}>
               <TouchableOpacity
                 style={[styles.menuItem, styles.activeMenuItem]}
@@ -2169,42 +2225,47 @@ function HamburgerMenu({
                 <Ionicons name="home-outline" size={scaleFont(18)} color="#1D61E7" />
                 <Text style={[styles.menuText, styles.activeMenuText]}>Dashboard</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={() => onNavigate('Workspace')}>
                 <Ionicons name="grid-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Thesis Workspace</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={() => onNavigate('Tasks')}>
                 <Octicons name="tasklist" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Tasks</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={() => onNavigate('Feedback')}>
-                <MaterialCommunityIcons
-                  name="comment-text-multiple-outline"
-                  size={scaleFont(18)}
-                  color="#000"
-                />
+                <MaterialCommunityIcons name="comment-text-multiple-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Adviser Feedback</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={() => onNavigate('Files')}>
                 <Ionicons name="library-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>File Repository</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem}>
                 <Feather name="video" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Meetings</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={() => onNavigate('Chat')}>
                 <Ionicons name="chatbubble-ellipses-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Chat</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem}>
                 <MaterialCommunityIcons name="robot-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>AI Assistant</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem}>
                 <Ionicons name="star-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Peer Assessment</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => onNavigate('Workspace', 'references')}
@@ -2212,6 +2273,7 @@ function HamburgerMenu({
                 <Ionicons name="book-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>References</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => onNavigate('Workspace', 'googleScholar')}
@@ -2219,6 +2281,7 @@ function HamburgerMenu({
                 <Ionicons name="school-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Google Scholar</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => onNavigate('Workspace', 'defensePrep')}
@@ -2226,15 +2289,19 @@ function HamburgerMenu({
                 <Ionicons name="time-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Defense Preparation</Text>
               </TouchableOpacity>
+
               <View style={styles.divider} />
+
               <TouchableOpacity style={styles.menuItem}>
                 <Ionicons name="settings-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Settings</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem}>
                 <Ionicons name="help-circle-outline" size={scaleFont(18)} color="#000" />
                 <Text style={styles.menuText}>Help & Support</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.menuItem} onPress={onLogout}>
                 <SimpleLineIcons name="logout" size={scaleFont(18)} color="#EF4444" />
                 <Text style={styles.logoutText}>Logout</Text>
@@ -2249,7 +2316,7 @@ function HamburgerMenu({
 }
 
 const styles = StyleSheet.create({
-  // LOGIN STYLES
+  // LOGIN & AUTH STYLES
   loginContainer: {
     flex: 1,
     backgroundColor: '#1D61E7',
@@ -2324,6 +2391,15 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(12),
     color: '#0F172A',
   },
+  forgotBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: 10,
+  },
+  forgotBtnText: {
+    fontSize: scaleFont(11),
+    color: '#1D61E7',
+    fontWeight: '600',
+  },
   loginSubmitBtn: {
     backgroundColor: '#1D61E7',
     borderRadius: 10,
@@ -2337,16 +2413,89 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(13),
     fontWeight: 'bold',
   },
-  loginFooterRow: {
-    marginTop: 16,
+  authSwitchRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 16,
   },
-  loginFooterText: {
-    fontSize: scaleFont(10),
-    color: '#94A3B8',
+  authSwitchText: {
+    fontSize: scaleFont(11),
+    color: '#64748B',
+  },
+  authSwitchLink: {
+    fontSize: scaleFont(11),
+    color: '#1D61E7',
+    fontWeight: 'bold',
+  },
+  forgotInstruction: {
+    fontSize: scaleFont(11),
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 16,
   },
 
-  // APP STYLES
+  // LOGOUT MODAL STYLES
+  logoutModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  logoutModalCard: {
+    width: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+  },
+  logoutModalTitle: {
+    fontSize: scaleFont(18),
+    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  logoutModalSubtitle: {
+    fontSize: scaleFont(12),
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  logoutModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  logoutCancelBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutCancelBtnText: {
+    fontSize: scaleFont(12),
+    color: '#475569',
+    fontWeight: '600',
+  },
+  logoutConfirmBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoutConfirmBtnText: {
+    fontSize: scaleFont(12),
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+
+  // APP GENERAL STYLES
   container: {
     flex: 1,
     backgroundColor: '#1D61E7',
@@ -2728,13 +2877,11 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(14),
     fontWeight: 'bold',
     color: '#0F172A',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   roadmapProgressPercent: {
     fontSize: scaleFont(14),
     fontWeight: 'bold',
     color: '#0F172A',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   roadmapProgressBarTrack: {
     height: 8,
@@ -2792,13 +2939,11 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(13),
     fontWeight: 'bold',
     color: '#0F172A',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   roadmapItemDate: {
     fontSize: scaleFont(10),
     color: '#94A3B8',
     marginTop: 2,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   roadmapRightStatusColumn: {
     paddingLeft: 8,
@@ -2904,7 +3049,6 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(11),
     color: '#475569',
     lineHeight: 16,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   adviserRow: {
     flexDirection: 'row',
@@ -3341,13 +3485,13 @@ const styles = StyleSheet.create({
   taskStatusInProgress: {
     fontSize: scaleFont(10),
     color: '#2563EB',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   taskSectionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   taskSectionHeader: {
     fontSize: scaleFont(13),
@@ -3358,10 +3502,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1D61E7',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 2,
   },
   addTaskBtnText: {
     color: '#FFFFFF',
@@ -3372,10 +3516,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    padding: 10,
+    borderRadius: 10,
     marginBottom: 8,
   },
   taskListTitle: {
@@ -3397,16 +3539,16 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
 
-  // FILES STYLES
+  // FILES & REFERENCES STYLES
   folderRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    borderRadius: 12,
     padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
   },
   folderTitle: {
     fontSize: scaleFont(12),
@@ -3421,11 +3563,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    borderRadius: 12,
     padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
   },
   fileTitle: {
     fontSize: scaleFont(12),
@@ -3435,183 +3577,37 @@ const styles = StyleSheet.create({
   fileDate: {
     fontSize: scaleFont(10),
     color: '#64748B',
-    marginTop: 2,
   },
-
-  // FEEDBACK STYLES
-  feedbackCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  adviserHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  adviserAvatarCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#BFDBFE',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  adviserNameText: {
-    fontSize: scaleFont(12),
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  adviserDateText: {
-    fontSize: scaleFont(9.5),
-    color: '#64748B',
-  },
-  ratingBadgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  overallRatingLabel: {
-    fontSize: scaleFont(10),
-    color: '#1E40AF',
-    fontWeight: '600',
-  },
-  ratingValueText: {
-    fontSize: scaleFont(10),
-    color: '#1E40AF',
-    fontWeight: 'bold',
-  },
-  feedbackBodyText: {
-    fontSize: scaleFont(11),
-    color: '#334155',
-    lineHeight: 16,
-    marginBottom: 8,
-  },
-  chapterTagBox: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  chapterTagTitle: {
-    fontSize: scaleFont(9.5),
-    color: '#475569',
-    fontWeight: '600',
-  },
-  replyBtn: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#1D61E7',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  replyBtnText: {
-    color: '#FFFFFF',
-    fontSize: scaleFont(10),
-    fontWeight: 'bold',
-  },
-  recentFeedbackCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 10,
-  },
-  feedbackCardFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  chapterSubText: {
-    fontSize: scaleFont(10),
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  statusReviewedTag: {
-    fontSize: scaleFont(9.5),
-    color: '#16A34A',
-    fontWeight: 'bold',
-  },
-  statusRevisionsTag: {
-    fontSize: scaleFont(9.5),
-    color: '#DC2626',
-    fontWeight: 'bold',
-  },
-  meetingCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginTop: 8,
-  },
-  meetingFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  meetPlatformText: {
-    fontSize: scaleFont(10),
-    color: '#475569',
-    fontWeight: '600',
-  },
-  viewDetailsBtn: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  viewDetailsText: {
-    fontSize: scaleFont(10),
-    color: '#0F172A',
-    fontWeight: '600',
-  },
-
-  // REFERENCES STYLES
   refTabsRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
     marginHorizontal: 16,
+    marginBottom: 12,
+    gap: 6,
   },
   refTabBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
   },
   refTabBtnActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#1D61E7',
+    backgroundColor: '#1D61E7',
   },
   refTabText: {
-    fontSize: scaleFont(11),
-    color: '#64748B',
-    fontWeight: '500',
+    fontSize: scaleFont(10.5),
+    color: '#475569',
+    fontWeight: '600',
   },
   refTabTextActive: {
-    color: '#1D61E7',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   refCard: {
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     padding: 12,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
   },
   refCardHeader: {
     flexDirection: 'row',
@@ -3637,66 +3633,22 @@ const styles = StyleSheet.create({
   apaBadgeText: {
     fontSize: scaleFont(9),
     color: '#475569',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   refTitle: {
     fontSize: scaleFont(12),
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   refAuthor: {
-    fontSize: scaleFont(10),
-    color: '#475569',
+    fontSize: scaleFont(10.5),
+    color: '#2563EB',
     marginBottom: 2,
   },
   refDetails: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#64748B',
-    fontStyle: 'italic',
-  },
-  mockupFabBot: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    zIndex: 10,
-  },
-  mockupBotCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EFF6FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mockupBotBubble1: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#3B82F6',
-  },
-  mockupBotBubble2: {
-    position: 'absolute',
-    bottom: 6,
-    left: 6,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#60A5FA',
   },
 
   // GOOGLE SCHOLAR STYLES
@@ -3715,27 +3667,26 @@ const styles = StyleSheet.create({
   },
   scholarInput: {
     flex: 1,
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     color: '#0F172A',
   },
   scholarFilterBar: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: 8,
   },
   scholarFilterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
     backgroundColor: '#F1F5F9',
-    marginRight: 8,
+    marginRight: 6,
   },
   scholarFilterChipActive: {
     backgroundColor: '#1D61E7',
   },
   scholarFilterText: {
     fontSize: scaleFont(10),
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#475569',
   },
   scholarFilterTextActive: {
     color: '#FFFFFF',
@@ -3745,9 +3696,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     padding: 12,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 10,
   },
   scholarCardTopRow: {
     flexDirection: 'row',
@@ -3756,16 +3707,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   scholarTitle: {
-    fontSize: scaleFont(12),
+    flex: 1,
+    fontSize: scaleFont(12.5),
     fontWeight: 'bold',
     color: '#1D61E7',
-    flex: 1,
   },
   pdfBadge: {
     backgroundColor: '#FEE2E2',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
   },
   pdfBadgeText: {
     fontSize: scaleFont(9),
@@ -3773,47 +3724,47 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scholarAuthors: {
-    fontSize: scaleFont(10),
-    color: '#16A34A',
+    fontSize: scaleFont(10.5),
+    color: '#15803D',
     marginTop: 2,
   },
   scholarPublication: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(10),
     color: '#64748B',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   scholarSnippet: {
     fontSize: scaleFont(10.5),
     color: '#334155',
     lineHeight: 15,
-    marginBottom: 8,
   },
   scholarFooterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    marginTop: 10,
     paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
   },
   scholarCitations: {
     fontSize: scaleFont(10),
     color: '#1D61E7',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   scholarImportBtn: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#E0E7FF',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   scholarImportBtnText: {
     fontSize: scaleFont(9.5),
-    color: '#1D61E7',
-    fontWeight: '600',
+    color: '#4338CA',
+    fontWeight: 'bold',
   },
 
-  // SCHOLAR MODAL STYLES
+  // SCHOLAR MODAL
   scholarModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -3835,21 +3786,21 @@ const styles = StyleSheet.create({
   scholarModalHeaderTitle: {
     fontSize: scaleFont(14),
     fontWeight: 'bold',
-    color: '#0F172A',
+    color: '#64748B',
   },
   scholarModalArticleTitle: {
-    fontSize: scaleFont(14),
+    fontSize: scaleFont(15),
     fontWeight: 'bold',
-    color: '#1D61E7',
+    color: '#0F172A',
     marginBottom: 6,
   },
   scholarModalAuthors: {
-    fontSize: scaleFont(11),
-    color: '#16A34A',
+    fontSize: scaleFont(11.5),
+    color: '#15803D',
     marginBottom: 2,
   },
   scholarModalPub: {
-    fontSize: scaleFont(10),
+    fontSize: scaleFont(11),
     color: '#64748B',
   },
   scholarModalDivider: {
@@ -3858,28 +3809,25 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   scholarModalSectionLabel: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   scholarModalSnippet: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(11.5),
     color: '#334155',
-    lineHeight: 16,
-    marginBottom: 16,
+    lineHeight: 17,
   },
   scholarModalActions: {
-    flexDirection: 'row',
-    gap: 10,
+    marginTop: 20,
   },
   scholarModalBtn: {
-    flex: 1,
     flexDirection: 'row',
-    height: 40,
-    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    height: 42,
+    borderRadius: 10,
     gap: 6,
   },
   scholarModalBtnPrimary: {
@@ -3887,7 +3835,7 @@ const styles = StyleSheet.create({
   },
   scholarModalBtnTextPrimary: {
     color: '#FFFFFF',
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(12),
     fontWeight: 'bold',
   },
 
@@ -3896,25 +3844,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 12,
     padding: 14,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 12,
   },
   defenseCardTitle: {
     fontSize: scaleFont(13),
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 8,
   },
   defenseDateTimeRow: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 12,
+    marginVertical: 8,
   },
   defenseDateText: {
     fontSize: scaleFont(11),
     color: '#1D61E7',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   defenseTimeText: {
     fontSize: scaleFont(11),
@@ -3923,36 +3870,38 @@ const styles = StyleSheet.create({
   timerGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 6,
+    marginTop: 6,
   },
   timerBox: {
+    backgroundColor: '#FFFFFF',
     flex: 1,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 8,
-    paddingVertical: 8,
     alignItems: 'center',
+    paddingVertical: 8,
+    marginHorizontal: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   timerVal: {
-    fontSize: scaleFont(16),
+    fontSize: scaleFont(14),
     fontWeight: 'bold',
     color: '#1D61E7',
   },
   timerSub: {
-    fontSize: scaleFont(8.5),
+    fontSize: scaleFont(9),
     color: '#64748B',
-    marginTop: 2,
   },
   checklistCountText: {
     fontSize: scaleFont(11),
-    color: '#1D61E7',
+    color: '#64748B',
     fontWeight: 'bold',
   },
   checklistBarTrack: {
     height: 6,
     backgroundColor: '#E2E8F0',
     borderRadius: 3,
+    marginTop: 6,
     overflow: 'hidden',
-    marginTop: 4,
   },
   checklistBarFill: {
     height: '100%',
@@ -3966,60 +3915,238 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   checkText: {
-    fontSize: scaleFont(11),
+    fontSize: scaleFont(11.5),
     color: '#334155',
   },
 
-  // BOTTOM TAB BAR STYLES
-  bottomTabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    paddingVertical: 6,
-    height: 56,
+  // FEEDBACK STYLES
+  feedbackCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  tabItem: {
-    flex: 1,
+  adviserHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  adviserAvatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#BFDBFE',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  tabText: {
+  adviserNameText: {
+    fontSize: scaleFont(12),
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  adviserDateText: {
     fontSize: scaleFont(9.5),
+    color: '#94A3B8',
+  },
+  ratingBadgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  overallRatingLabel: {
+    fontSize: scaleFont(10.5),
+    color: '#64748B',
+  },
+  ratingValueText: {
+    fontSize: scaleFont(11),
+    fontWeight: 'bold',
+    color: '#D97706',
+  },
+  feedbackBodyText: {
+    fontSize: scaleFont(11),
+    color: '#334155',
+    lineHeight: 16,
+  },
+  chapterTagBox: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E0E7FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  chapterTagTitle: {
+    fontSize: scaleFont(9.5),
+    color: '#3730A3',
+    fontWeight: '600',
+  },
+  replyBtn: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#1D61E7',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  replyBtnText: {
+    color: '#FFFFFF',
+    fontSize: scaleFont(10),
+    fontWeight: 'bold',
+  },
+  recentFeedbackCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  feedbackCardFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  chapterSubText: {
+    fontSize: scaleFont(10.5),
+    color: '#64748B',
+  },
+  statusReviewedTag: {
+    fontSize: scaleFont(10),
+    color: '#16A34A',
+    fontWeight: 'bold',
+  },
+  statusRevisionsTag: {
+    fontSize: scaleFont(10),
+    color: '#DC2626',
+    fontWeight: 'bold',
+  },
+  meetingCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  meetingFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  meetPlatformText: {
+    fontSize: scaleFont(10.5),
+    color: '#00832D',
+    fontWeight: '600',
+  },
+  viewDetailsBtn: {
+    backgroundColor: '#1D61E7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  viewDetailsText: {
+    color: '#FFFFFF',
+    fontSize: scaleFont(9.5),
+    fontWeight: 'bold',
+  },
+
+  // MOCKUP FAB BOT
+  mockupFabBot: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E0F2FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  mockupBotCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mockupBotBubble1: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#38BDF8',
+  },
+  mockupBotBubble2: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#0284C7',
+  },
+
+  // BOTTOM TAB BAR
+  bottomTabBar: {
+    flexDirection: 'row',
+    height: 56,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  tabText: {
+    fontSize: scaleFont(9),
     color: '#64748B',
     marginTop: 2,
   },
   tabTextActive: {
-    fontSize: scaleFont(9.5),
+    fontSize: scaleFont(9),
     color: '#1D61E7',
     fontWeight: 'bold',
     marginTop: 2,
   },
 
-  // HAMBURGER MENU MODAL STYLES
+  // HAMBURGER SIDEBAR STYLES
   overlay: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   backdrop: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   drawer: {
     width: SCREEN_WIDTH * 0.75,
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 20,
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    height: '100%',
+    padding: 16,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
   },
   backButton: {
-    paddingVertical: 8,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginBottom: 20,
   },
   logoText: {
@@ -4034,15 +4161,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 8,
     gap: 12,
   },
   activeMenuItem: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#E0E7FF',
   },
   menuText: {
-    fontSize: scaleFont(12),
+    fontSize: scaleFont(12.5),
     color: '#334155',
     fontWeight: '500',
   },
@@ -4051,7 +4178,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   logoutText: {
-    fontSize: scaleFont(12),
+    fontSize: scaleFont(12.5),
     color: '#EF4444',
     fontWeight: 'bold',
   },
@@ -4059,6 +4186,7 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(10),
     color: '#94A3B8',
     textAlign: 'center',
-    marginTop: 24,
+    marginTop: 20,
+    marginBottom: 10,
   },
 });
