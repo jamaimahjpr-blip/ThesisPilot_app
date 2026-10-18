@@ -61,13 +61,13 @@
         "projectId": "ac7a7604-55a2-4dfd-9275-6fe2c5524e0f"
       },
       "EXPO_PUBLIC_SUPABASE_URL": "https://wihpdrmlbfmtujhbevmg.supabase.co",
-      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODU1MjYsImV4cCI6MjA1NTk2MTUyNn0"
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTI2MDIsImV4cCI6MjEwNzU2ODYwMn0._WqYGk-gEeeYos7aF6XCBDqY3wSoV6gqcteBGkTw8Ts"
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/038e264a-5b45-40d1-8b94-d69affce7b14"
+      "url": "https://u.expo.dev/ac7a7604-55a2-4dfd-9275-6fe2c5524e0f"
     },
     "owner": "jamaimahjprs-team"
   }

@@ -14,16 +14,12 @@ const rawUrl =
 const rawKey =
   Constants.expoConfig?.extra?.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODU1MjYsImV4cCI6MjA1NTk2MTUyNn0';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTI2MDIsImV4cCI6MjEwNzU2ODYwMn0._WqYGk-gEeeYos7aF6XCBDqY3wSoV6gqcteBGkTw8Ts';
 
-// Safe key cleanup to prevent "Cannot read property 'split' of undefined"
+// Safe key cleanup without returning empty string or causing undefined splits
 const cleanKey = (key?: string) => {
   if (!key) return '';
-  const parts = key.split('.');
-  if (parts.length >= 3) {
-    return `${parts[0]}.${parts[1]}.${parts[2].split('.')[0]}`;
-  }
-  return key;
+  return key.trim();
 };
 
 export const SUPABASE_URL = (rawUrl || '').trim();
