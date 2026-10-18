@@ -61,7 +61,7 @@
         "projectId": "ac7a7604-55a2-4dfd-9275-6fe2c5524e0f"
       },
       "EXPO_PUBLIC_SUPABASE_URL": "https://wihpdrmlbfmtujhbevmg.supabase.co",
-      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODU1MjYsImV4cCI6MjA1NTk2MTUyNn0.sb_publishable_LbXslIwze95yfcf7srgrfQ_80RYf711"
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzODU1MjYsImV4cCI6MjA1NTk2MTUyNn0"
     },
     "runtimeVersion": {
       "policy": "appVersion"
