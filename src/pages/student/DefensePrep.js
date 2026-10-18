@@ -1,7 +1,7 @@
 // src/pages/student/DefensePrep.js
 import React, { useContext, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { AuthContext } from '../../context/AuthContext'; // Access Google OAuth token
+import { AuthContext } from '../../../app/src/context/AuthContext'; // Access Google OAuth token
 import { createDefensePresentation } from '../../services/slidesService'; // Google Slides Integration Service
 
 export default function DefensePrep() {

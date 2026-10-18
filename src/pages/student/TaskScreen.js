@@ -1,7 +1,7 @@
 // src/pages/student/TaskScreen.js
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { AuthContext } from '../../context/AuthContext'; // Access Google OAuth token
+import { AuthContext } from '../../../app/src/context/AuthContext'; // Access Google OAuth token
 import { getCalendarTasks } from '../../services/calendarService'; // Google Calendar Integration Service
 import { getClassroomAssignments } from '../../services/classroomService'; // Google Classroom Integration Service
 

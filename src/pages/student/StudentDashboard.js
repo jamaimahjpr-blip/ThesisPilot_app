@@ -17,7 +17,7 @@ import {
   Feather,
   SimpleLineIcons
 } from '@expo/vector-icons';
-import { AuthContext } from '../../context/AuthContext'; // Access Google OAuth tokens
+import { AuthContext } from '../../../app/src/context/AuthContext'; // Access Google OAuth tokens
 import { getCalendarTasks } from '../../services/calendarService'; // Google Calendar Integration
 import { getClassroomAssignments } from '../../services/classroomService'; // Google Classroom Integration
 

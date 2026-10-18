@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../../app/src/context/AuthContext';
 
 export default function Navbar({ title = 'ThesisPilot', onMenuPress }) {
   const { user } = useContext(AuthContext);

@@ -9,7 +9,7 @@ import {
   Alert,
   Linking
 } from 'react-native';
-import { AuthContext } from '../../context/AuthContext'; // Access Google OAuth token
+import { AuthContext } from '../../../app/src/context/AuthContext'; // Access Google OAuth token
 import { createChapterDoc } from '../../services/docsService'; // Google Docs Service Integration
 import { listThesisFiles } from '../../services/driveService'; // Google Drive Service Integration
 
