@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
-
 // Import Types
 import {
   SplashScreenProps,
@@ -13,7 +12,6 @@ import {
   FeedbackItem,
   ReferenceItem,
 } from './types';
-
 // Import Screen Components
 import {
   SplashScreenComponent as SplashScreen,
@@ -89,6 +87,7 @@ export default function MainApp(props: SplashScreenProps) {
   ]);
 
   const [selectedThesis, setSelectedThesis] = useState<ThesisProject>(thesisProjectsList[0]);
+
   const [chaptersList, setChaptersList] = useState<ChapterItem[]>([
     {
       id: 'ch-1',
@@ -228,7 +227,7 @@ export default function MainApp(props: SplashScreenProps) {
       <StatusBar barStyle="light-content" backgroundColor="#1E58A8" translucent={false} />
       {currentScreen === 'splash' ? (
         <SplashScreen
-          onGoogleSignUp={() => setCurrentScreen('login')}
+          onGoogleSignUp={() => setCurrentScreen('roleSelect')}
           onGoogleLogin={() => setCurrentScreen('login')}
         />
       ) : currentScreen === 'login' ? (
