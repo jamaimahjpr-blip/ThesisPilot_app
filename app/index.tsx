@@ -12,12 +12,12 @@ import {
   TaskItem,
   FeedbackItem,
   ReferenceItem,
-} from './types';
+} from '../types';
 
 // Import Screen Components from inside app/screens/ folder
-import * as AuthModule from './screens/AuthScreen';
-import StudentDashboardScreen from './screens/StudentDashboardScreen';
-import EducatorDashboardScreen from './screens/EducatorDashboardScreen';
+import * as AuthModule from '../screens/AuthScreen';
+import StudentDashboardScreen from '../screens/StudentDashboardScreen';
+import EducatorDashboardScreen from '../screens/EducatorDashboardScreen';
 
 // Resolve individual components safely whether default or named exports
 const SplashScreen =
