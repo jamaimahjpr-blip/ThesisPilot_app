@@ -14,16 +14,13 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as DocumentPicker from 'expo-document-picker';
-import { GoogleGenAI } from '@google/genai';
 import Constants from 'expo-constants';
 
 // Multi-fallback strategy for Expo / EAS production build keys
 const apiKey =
   process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
   Constants.expoConfig?.extra?.EXPO_PUBLIC_GEMINI_API_KEY ||
-  'AQ.Ab8RN6LkUyFMMktiO7PNh52ZW0nApsaO7WggiSYsCt3zlNxjBQ';
-
-const ai = new GoogleGenAI({ apiKey });
+  'AQ.Ab8RN6LK4ihmJmMBdS8JEMnY1CRatILu5fnheKcFNXG4jMnjDw';
 
 interface AIAssistantScreenProps {
   onBack?: () => void;
@@ -194,22 +191,48 @@ export default function AIAssistantScreen({
     setTimeout(() => setCopiedCitation(false), 3000);
   };
 
-  // REAL LIVE GEMINI AI RESPONSE GENERATOR
+  // REAL LIVE GEMINI AI RESPONSE GENERATOR (Direct Fetch API)
   const fetchLiveGeminiResponse = async (userPrompt: string): Promise<string> => {
     try {
       if (!apiKey) {
         return 'Please set your EXPO_PUBLIC_GEMINI_API_KEY in your .env file to enable live AI responses.';
       }
-      // Fixed model name from gemini-2.5-flash to standard gemini-1.5-flash
-      const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: userPrompt,
-        config: {
-          systemInstruction:
-            'You are an expert thesis guide and academic assistant for college students. Provide helpful, structured, and clear academic advice.',
-        },
-      });
-      return response.text || 'I apologize, but I could not generate a response. Please try again.';
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: userPrompt }],
+              },
+            ],
+            systemInstruction: {
+              parts: [
+                {
+                  text: 'You are an expert thesis guide and academic assistant for college students. Provide helpful, structured, and clear academic advice.',
+                },
+              ],
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.error('Gemini API Error:', data.error);
+        return `API Error: ${data.error.message || 'Invalid API Key'}`;
+      }
+
+      return (
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        'I apologize, but I could not generate a response. Please try again.'
+      );
     } catch (err) {
       return 'Sorry, I encountered an issue connecting to Gemini AI. Please check your network connection or API Key.';
     }
