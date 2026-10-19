@@ -15,9 +15,14 @@ import {
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as DocumentPicker from 'expo-document-picker';
 import { GoogleGenAI } from '@google/genai';
+import Constants from 'expo-constants';
 
-// Initialize Google Gemini Client using your .env API Key
-const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+// Multi-fallback strategy for Expo / EAS production build keys
+const apiKey =
+  process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
+  Constants.expoConfig?.extra?.EXPO_PUBLIC_GEMINI_API_KEY ||
+  'AQ.Ab8RN6LkUyFMMktiO7PNh52ZW0nApsaO7WggiSYsCt3zlNxjBQ';
+
 const ai = new GoogleGenAI({ apiKey });
 
 interface AIAssistantScreenProps {
@@ -54,9 +59,9 @@ export default function AIAssistantScreen({
     'dashboard' | 'plagiarism' | 'grammar' | 'citation' | 'chatbot'
   >('dashboard');
 
-  // Selected File State (Dynamic for Plagiarism, Grammar & Citation Generator)
+  // Selected File State
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>({
-    name: 'Chapter 3 - RRL.docx',
+    name: 'Chapter 3 RRL.docx',
     size: 'DOCX 2.3 MB',
     uri: '',
     title: 'The impact of social media on consumer behavior',
@@ -64,7 +69,7 @@ export default function AIAssistantScreen({
     year: '2022',
     journal: 'Journal of Marketing Research',
     volume: '45(3)',
-    pages: '123 - 136',
+    pages: '123-136',
     doi: 'https://doi.org/10.1177/00222437211066628',
   });
 
@@ -115,7 +120,6 @@ export default function AIAssistantScreen({
         const file = result.assets[0];
         const sizeInMB = file.size ? (file.size / (1024 * 1024)).toFixed(1) : '1.0';
         const fileExt = file.name.split('.').pop()?.toUpperCase() || 'FILE';
-
         const cleanTitle = file.name.replace(/\.[^/.]+$/, '');
 
         setSelectedFile({
@@ -127,11 +131,10 @@ export default function AIAssistantScreen({
           author: 'John Matti',
           year: '2022',
           journal: 'Journal of Academic Research & Technology',
-          volume: '12(2)',
-          pages: '45 - 62',
+          volume: '12 (2)',
+          pages: '145-162',
           doi: 'https://doi.org/10.1007/s11747-019-00695-1',
         });
-
         Alert.alert('File Selected', `Successfully selected ${file.name} from device storage.`);
       }
     } catch (error) {
@@ -163,7 +166,6 @@ export default function AIAssistantScreen({
     Alert.alert('Analysis Complete', 'Grammar check finished successfully.');
   };
 
-  // Dynamic Citation Generator Text based on File and Format
   const getGeneratedCitationText = () => {
     const file = selectedFile || {
       title: 'The impact of social media on consumer behavior',
@@ -171,7 +173,7 @@ export default function AIAssistantScreen({
       year: '2022',
       journal: 'Journal of Marketing Research',
       volume: '45(3)',
-      pages: '123 - 136',
+      pages: '123-136',
       doi: 'https://doi.org/10.1177/00222437211066628',
     };
 
@@ -198,23 +200,21 @@ export default function AIAssistantScreen({
       if (!apiKey) {
         return 'Please set your EXPO_PUBLIC_GEMINI_API_KEY in your .env file to enable live AI responses.';
       }
-
+      // Fixed model name from gemini-2.5-flash to standard gemini-1.5-flash
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: userPrompt,
         config: {
           systemInstruction:
             'You are an expert thesis guide and academic assistant for college students. Provide helpful, structured, and clear academic advice.',
         },
       });
-
       return response.text || 'I apologize, but I could not generate a response. Please try again.';
     } catch (err) {
       return 'Sorry, I encountered an issue connecting to Gemini AI. Please check your network connection or API Key.';
     }
   };
 
-  // Send New Message in Chatbot with Live Gemini AI Integration
   const handleSendChatMessage = async (textToSend?: string) => {
     const query = textToSend || chatInputText;
     if (!query.trim() || isAiLoading) return;
@@ -244,13 +244,11 @@ export default function AIAssistantScreen({
     setIsAiLoading(false);
   };
 
-  // Handle Long Press on Chat Message
   const handleLongPressChatMessage = (msg: ChatMessage) => {
     setSelectedChatMessage(msg);
     setShowChatOptionsModal(true);
   };
 
-  // Delete Selected Chat Message
   const handleDeleteChatMessage = () => {
     if (selectedChatMessage) {
       setChatMessages((prev) => prev.filter((m) => m.id !== selectedChatMessage.id));
@@ -259,7 +257,6 @@ export default function AIAssistantScreen({
     setSelectedChatMessage(null);
   };
 
-  // Open Edit Modal for User Message
   const handleOpenEditModal = () => {
     if (selectedChatMessage) {
       setEditInputText(selectedChatMessage.text);
@@ -268,10 +265,8 @@ export default function AIAssistantScreen({
     }
   };
 
-  // Save Edited User Message and Regenerate Bot Answer with Live AI
   const handleSaveEditedMessage = async () => {
     if (!editInputText.trim() || !selectedChatMessage) return;
-
     const updatedText = editInputText.trim();
     setShowEditModal(false);
     setIsAiLoading(true);
@@ -281,16 +276,11 @@ export default function AIAssistantScreen({
     setChatMessages((prev) => {
       const index = prev.findIndex((m) => m.id === selectedChatMessage.id);
       if (index === -1) return prev;
-
       const newArr = [...prev];
-      // Update User Message
       newArr[index] = { ...newArr[index], text: updatedText };
-
-      // If next message is a bot response, update it too
       if (index + 1 < newArr.length && newArr[index + 1].sender === 'bot') {
         newArr[index + 1] = { ...newArr[index + 1], text: newBotResponse };
       }
-
       return newArr;
     });
 
@@ -338,7 +328,6 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'dashboard' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.dashGreetingTitle}>How can I help you today?</Text>
-
             <View style={styles.gridContainer}>
               <TouchableOpacity
                 style={[styles.gridCard, { backgroundColor: '#FECDD3' }]}
@@ -357,7 +346,7 @@ export default function AIAssistantScreen({
                 onPress={() => setActiveSubScreen('grammar')}
               >
                 <View style={styles.gridIconBox}>
-                  <Ionicons name="text-outline" size={28} color="#16A34A" />
+                  <Ionicons name="text-outline" size={28} color="#16434A" />
                 </View>
                 <Text style={styles.gridCardText}>Grammar Checker</Text>
               </TouchableOpacity>
@@ -412,7 +401,7 @@ export default function AIAssistantScreen({
                   <Text style={styles.docxBadgeText}>DOCX</Text>
                 </View>
                 <View style={styles.recentInfo}>
-                  <Text style={styles.recentTitle}>Chapter 1 - Introduction.docx</Text>
+                  <Text style={styles.recentTitle}>Chapter 1 Introduction.docx</Text>
                   <Text style={styles.recentSub}>Grammar Check</Text>
                 </View>
                 <Text style={[styles.recentStatusText, { color: '#22C55E' }]}>Good</Text>
@@ -426,13 +415,11 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'plagiarism' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.subScreenHeaderLabel}>Upload or Paste Text</Text>
-
             <View style={styles.uploadBtnRow}>
               <TouchableOpacity style={styles.uploadActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
-
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -445,7 +432,9 @@ export default function AIAssistantScreen({
                   <Text style={styles.docxBadgeText}>DOCX</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.fileNameText} numberOfLines={1}>{selectedFile.name}</Text>
+                  <Text style={styles.fileNameText} numberOfLines={1}>
+                    {selectedFile.name}
+                  </Text>
                   <Text style={styles.fileSizeText}>{selectedFile.size}</Text>
                 </View>
                 <TouchableOpacity onPress={handleRemoveFile}>
@@ -468,13 +457,11 @@ export default function AIAssistantScreen({
                 <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Results</Text>
                 <View style={styles.resultsCardBox}>
                   <Text style={styles.originalPercentageText}>92%</Text>
-                  <Text style={styles.originalStatusSubText}>Original</Text>
-
+                  <Text style={styles.originalStatusSubText}>Original Content</Text>
                   <View style={styles.dividerLine} />
-
                   <View style={styles.legendRow}>
                     <View style={[styles.colorSquare, { backgroundColor: '#22C55E' }]} />
-                    <Text style={styles.legendText}>92% Original Content</Text>
+                    <Text style={styles.legendText}>92% Original</Text>
                   </View>
                   <View style={[styles.legendRow, { marginTop: 6 }]}>
                     <View style={[styles.colorSquare, { backgroundColor: '#EF4444' }]} />
@@ -488,18 +475,20 @@ export default function AIAssistantScreen({
                     <View style={styles.sourceBadgeCircle}>
                       <Text style={styles.sourceBadgeText}>1</Text>
                     </View>
-                    <Text style={styles.sourceUrlText} numberOfLines={1}>www.examplejournal.com</Text>
+                    <Text style={styles.sourceUrlText} numberOfLines={1}>
+                      www.examplejournal.com
+                    </Text>
                     <Text style={styles.sourcePercentText}>2%</Text>
                   </View>
-
                   <View style={styles.sourceRowItem}>
                     <View style={styles.sourceBadgeCircle}>
-                      <Text style={styles.sourceBadgeText}>1</Text>
+                      <Text style={styles.sourceBadgeText}>2</Text>
                     </View>
-                    <Text style={styles.sourceUrlText} numberOfLines={1}>www.repositoryuniversity.edu</Text>
+                    <Text style={styles.sourceUrlText} numberOfLines={1}>
+                      www.repositoryuniversity.edu
+                    </Text>
                     <Text style={styles.sourcePercentText}>6%</Text>
                   </View>
-
                   <TouchableOpacity style={styles.viewAllSourcesBtn}>
                     <Text style={styles.viewAllSourcesText}>View all sources</Text>
                   </TouchableOpacity>
@@ -513,13 +502,11 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'grammar' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.subScreenHeaderLabel}>Upload or Paste Text</Text>
-
             <View style={styles.uploadBtnRow}>
               <TouchableOpacity style={styles.uploadActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
-
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -532,7 +519,9 @@ export default function AIAssistantScreen({
                   <Text style={styles.docxBadgeText}>DOCX</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.fileNameText} numberOfLines={1}>{selectedFile.name}</Text>
+                  <Text style={styles.fileNameText} numberOfLines={1}>
+                    {selectedFile.name}
+                  </Text>
                   <Text style={styles.fileSizeText}>{selectedFile.size}</Text>
                 </View>
                 <TouchableOpacity onPress={handleRemoveFile}>
@@ -578,16 +567,18 @@ export default function AIAssistantScreen({
                   <View style={styles.suggestionIconBox}>
                     <Ionicons name="bulb-outline" size={24} color="#1D4ED8" />
                   </View>
-
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={styles.originalSentenceText}>
                       Original: The results shows that the data are significant.
                     </Text>
                     <View style={styles.suggestionDivider} />
                     <Text style={styles.correctedSentenceText}>
-                      Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text> <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>that the</Text> <Text style={{ color: '#D97706' }}>significant data</Text>.
+                      Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text>{' '}
+                      <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>
+                        that the
+                      </Text>{' '}
+                      <Text style={{ color: '#D97706' }}>significant data</Text>.
                     </Text>
-
                     <TouchableOpacity style={styles.replaceBtnTouch}>
                       <Text style={styles.replaceBtnText}>Replace</Text>
                     </TouchableOpacity>
@@ -628,7 +619,6 @@ export default function AIAssistantScreen({
                   APA 7th
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -645,7 +635,6 @@ export default function AIAssistantScreen({
                   MLA 9th
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -677,7 +666,6 @@ export default function AIAssistantScreen({
 
               <View style={styles.citationTextInnerBox}>
                 <Text style={styles.generatedCitationText}>{getGeneratedCitationText()}</Text>
-
                 <TouchableOpacity
                   style={styles.copyCitationBtn}
                   activeOpacity={0.8}
@@ -693,29 +681,41 @@ export default function AIAssistantScreen({
 
             <View style={styles.sourceDetailsCard}>
               <Text style={styles.sourceDetailsHeaderTitle}>Source Details</Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Title: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.title || 'The impact of social media on consumer behavior'}</Text>
+                Title:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.title || 'The impact of social media on consumer behavior'}
+                </Text>
               </Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Author: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.author || 'John Matti'}</Text>
+                Author:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.author || 'John Matti'}
+                </Text>
               </Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Year: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.year || '2022'}</Text>
+                Year:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.year || '2022'}
+                </Text>
               </Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Journal: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.journal || 'Journal of Marketing Research'}</Text>
+                Journal:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.journal || 'Journal of Marketing Research'}
+                </Text>
               </Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Volume: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.volume || '45(3)'}</Text>
+                Volume:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.volume || '45(3)'}
+                </Text>
               </Text>
-
               <Text style={styles.sourceDetailRowText}>
-                Pages: <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>{selectedFile?.pages || '123 - 136'}</Text>
+                Pages:{' '}
+                <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
+                  {selectedFile?.pages || '123-136'}
+                </Text>
               </Text>
             </View>
           </ScrollView>
@@ -731,12 +731,12 @@ export default function AIAssistantScreen({
                   <Ionicons name="hardware-chip" size={24} color="#2563EB" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.greetingHeaderTitle}>Buenos días, User! 👋</Text>
+                  <Text style={styles.greetingHeaderTitle}>Buenos dias, User!</Text>
                   <Text style={styles.greetingSubTitle}>Ask me anything about your thesis.</Text>
                 </View>
               </View>
 
-              {/* CHAT MESSAGES THREAD WITH LONG PRESS SUPPORT */}
+              {/* CHAT MESSAGES THREAD */}
               {chatMessages.map((msg) => (
                 <TouchableOpacity
                   key={msg.id}
@@ -790,14 +790,12 @@ export default function AIAssistantScreen({
                 >
                   <Text style={styles.chatPromptChipText}>Find related studies</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Explain framework')}
                 >
                   <Text style={styles.chatPromptChipText}>Explain framework</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Help with methodology')}
@@ -827,13 +825,11 @@ export default function AIAssistantScreen({
         )}
       </View>
 
-      {/* MODAL 1: LONG PRESS OPTIONS MODAL FOR CHAT MESSAGES */}
+      {/* MODAL 1: LONG PRESS OPTIONS MODAL */}
       <Modal visible={showChatOptionsModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.smallOptionsModalCard}>
             <Text style={styles.smallModalHeaderTitle}>Message Options</Text>
-
-            {/* IF USER SENT MESSAGE: SHOW EDIT, DELETE & CLOSE */}
             {selectedChatMessage?.sender === 'user' && (
               <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleOpenEditModal}>
                 <Ionicons name="create-outline" size={20} color="#2563EB" />
@@ -841,13 +837,11 @@ export default function AIAssistantScreen({
               </TouchableOpacity>
             )}
 
-            {/* DELETE OPTION (FOR BOTH USER & BOT MESSAGES) */}
             <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleDeleteChatMessage}>
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
               <Text style={[styles.modalOptionLabelText, { color: '#EF4444' }]}>Delete Message</Text>
             </TouchableOpacity>
 
-            {/* CLOSE OPTION */}
             <TouchableOpacity
               style={styles.modalOptionCloseBtn}
               onPress={() => {
@@ -866,14 +860,12 @@ export default function AIAssistantScreen({
         <View style={styles.modalOverlayDark}>
           <View style={styles.smallOptionsModalCard}>
             <Text style={styles.smallModalHeaderTitle}>Edit Message</Text>
-
             <TextInput
               style={styles.modalEditTextInput}
               value={editInputText}
               onChangeText={setEditInputText}
               multiline
             />
-
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
                 style={[styles.modalOptionCloseBtn, { flex: 1, marginTop: 0 }]}
@@ -885,7 +877,6 @@ export default function AIAssistantScreen({
               >
                 <Text style={styles.modalOptionCloseText}>Cancel</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.primaryBlueActionBtn, { flex: 1 }]}
                 onPress={handleSaveEditedMessage}
@@ -972,7 +963,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   recentChecksBox: {
-    backgroundColor: '#334155',
+    backgroundColor: '#F8FAFC',
     borderRadius: 12,
     paddingHorizontal: 14,
   },
@@ -981,7 +972,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#475569',
+    borderBottomColor: '#E2E8F0',
   },
   docxBadge: {
     backgroundColor: '#2563EB',
@@ -1001,7 +992,7 @@ const styles = StyleSheet.create({
   recentTitle: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   recentSub: {
     fontSize: 11,
@@ -1175,14 +1166,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0F172A',
   },
+  viewAllSourcesBtn: {
+    alignSelf: 'flex-end',
+  },
   viewAllSourcesText: {
     fontSize: 11,
     color: '#64748B',
     textAlign: 'right',
     marginTop: 6,
-  },
-  viewAllSourcesBtn: {
-    alignSelf: 'flex-end',
   },
   grammarResultsCard: {
     flexDirection: 'row',
@@ -1291,7 +1282,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   citationTabBtnActive: {
-    backgroundColor: '#93C5FD',
+    backgroundColor: '#FFFFFF',
   },
   citationTabText: {
     fontSize: 13,
