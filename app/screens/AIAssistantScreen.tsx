@@ -192,11 +192,11 @@ export default function AIAssistantScreen({
     setTimeout(() => setCopiedCitation(false), 3000);
   };
 
-  // REAL LIVE GEMINI AI RESPONSE GENERATOR (Fixed REST Endpoint)
+  // REAL LIVE GEMINI AI RESPONSE GENERATOR
   const fetchLiveGeminiResponse = async (userPrompt: string): Promise<string> => {
     try {
       if (!apiKey) {
-        return 'Please set your EXPO_PUBLIC_GEMINI_API_KEY in your .env file to enable live AI responses.';
+        return 'Please set your EXPO_PUBLIC_GEMINI_API_KEY in your env file to enable live AI responses.';
       }
 
       const response = await fetch(
@@ -224,7 +224,6 @@ export default function AIAssistantScreen({
       );
 
       const data = await response.json();
-
       if (data.error) {
         console.error('Gemini API Error:', data.error);
         return `API Error: ${data.error.message || 'Invalid API Key'}`;
@@ -292,7 +291,6 @@ export default function AIAssistantScreen({
   const handleSaveEditedMessage = async () => {
     if (!editInputText.trim() || !selectedChatMessage) return;
     const updatedText = editInputText.trim();
-
     setShowEditModal(false);
     setIsAiLoading(true);
 
@@ -301,7 +299,6 @@ export default function AIAssistantScreen({
     setChatMessages((prev) => {
       const index = prev.findIndex((m) => m.id === selectedChatMessage.id);
       if (index === -1) return prev;
-
       const newArr = [...prev];
       newArr[index] = { ...newArr[index], text: updatedText };
       if (index + 1 < newArr.length && newArr[index + 1].sender === 'bot') {
@@ -354,7 +351,6 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'dashboard' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.dashGreetingTitle}>How can I help you today?</Text>
-
             <View style={styles.gridContainer}>
               <TouchableOpacity
                 style={[styles.gridCard, { backgroundColor: '#FECDD3' }]}
@@ -412,7 +408,7 @@ export default function AIAssistantScreen({
                   <Text style={styles.docxBadgeText}>DOCX</Text>
                 </View>
                 <View style={styles.recentInfo}>
-                  <Text style={styles.recentTitle}>Chapter 2 - RRL.docx</Text>
+                  <Text style={styles.recentTitle}>Chapter 2 RRL.docx</Text>
                   <Text style={styles.recentSub}>Plagiarism Check</Text>
                 </View>
                 <Text style={[styles.recentStatusText, { color: '#22C55E' }]}>92% Original</Text>
@@ -447,7 +443,6 @@ export default function AIAssistantScreen({
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
-
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -508,7 +503,6 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>2%</Text>
                   </View>
-
                   <View style={styles.sourceRowItem}>
                     <View style={styles.sourceBadgeCircle}>
                       <Text style={styles.sourceBadgeText}>2</Text>
@@ -518,7 +512,6 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>6%</Text>
                   </View>
-
                   <TouchableOpacity style={styles.viewAllSourcesBtn}>
                     <Text style={styles.viewAllSourcesText}>View all sources</Text>
                   </TouchableOpacity>
@@ -537,7 +530,6 @@ export default function AIAssistantScreen({
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
-
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -606,7 +598,7 @@ export default function AIAssistantScreen({
                     <Text style={styles.correctedSentenceText}>
                       Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text> that the{' '}
                       <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>data</Text>{' '}
-                      <Text style={{ color: '#D97706' }}>significant</Text>.
+                      <Text style={{ color: '#D97706' }}>are significant</Text>.
                     </Text>
                     <TouchableOpacity style={styles.replaceBtnTouch}>
                       <Text style={styles.replaceBtnText}>Replace</Text>
@@ -648,7 +640,6 @@ export default function AIAssistantScreen({
                   APA 7th
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -665,7 +656,6 @@ export default function AIAssistantScreen({
                   MLA 9th
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -694,7 +684,6 @@ export default function AIAssistantScreen({
                   <Text style={styles.citationSuccessSub}>Your citation has been generated.</Text>
                 </View>
               </View>
-
               <View style={styles.citationTextInnerBox}>
                 <Text style={styles.generatedCitationText}>{getGeneratedCitationText()}</Text>
                 <TouchableOpacity
@@ -821,14 +810,12 @@ export default function AIAssistantScreen({
                 >
                   <Text style={styles.chatPromptChipText}>Find related studies</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Explain framework')}
                 >
                   <Text style={styles.chatPromptChipText}>Explain framework</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Help with methodology')}
@@ -847,7 +834,10 @@ export default function AIAssistantScreen({
                 value={chatInputText}
                 onChangeText={setChatInputText}
               />
-              <TouchableOpacity style={styles.chatSendBtnTouch} onPress={() => handleSendChatMessage()}>
+              <TouchableOpacity
+                style={styles.chatSendBtnTouch}
+                onPress={() => handleSendChatMessage()}
+              >
                 <Ionicons name="send" size={18} color="#2563EB" />
               </TouchableOpacity>
             </View>
@@ -860,19 +850,18 @@ export default function AIAssistantScreen({
         <View style={styles.modalOverlayDark}>
           <View style={styles.smallOptionsModalCard}>
             <Text style={styles.smallModalHeaderTitle}>Message Options</Text>
-
             {selectedChatMessage?.sender === 'user' && (
               <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleOpenEditModal}>
                 <Ionicons name="create-outline" size={20} color="#2563EB" />
                 <Text style={styles.modalOptionLabelText}>Edit Message</Text>
               </TouchableOpacity>
             )}
-
             <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleDeleteChatMessage}>
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
-              <Text style={[styles.modalOptionLabelText, { color: '#EF4444' }]}>Delete Message</Text>
+              <Text style={[styles.modalOptionLabelText, { color: '#EF4444' }]}>
+                Delete Message
+              </Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.modalOptionCloseBtn}
               onPress={() => {
@@ -908,7 +897,6 @@ export default function AIAssistantScreen({
               >
                 <Text style={styles.modalOptionCloseText}>Cancel</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.primaryBlueActionBtn, { flex: 1 }]}
                 onPress={handleSaveEditedMessage}
@@ -925,8 +913,8 @@ export default function AIAssistantScreen({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#1E58A8',
+    flex: 1,
   },
   topHeaderBar: {
     flexDirection: 'row',

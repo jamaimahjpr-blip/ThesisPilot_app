@@ -57,19 +57,16 @@
     },
     "extra": {
       "router": {},
-      "eas": {
-        "projectId": "ac7a7604-55a2-4dfd-9275-6fe2c5524e0f"
-      },
       "EXPO_PUBLIC_SUPABASE_URL": "https://wihpdrmlbfmtujhbevmg.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTI2MDIsImV4cCI6MjEwNzU2ODYwMn0._WqYGk-gEeeYos7aF6XCBDqY3wSoV6gqcteBGkTw8Ts",
-      "EXPO_PUBLIC_GEMINI_API_KEY": "AQ.Ab8RN6LK4ihmJmMBdS8JEMnY1CRatILu5fnheKcFNXG4jMnjDw"
+      "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyBqmAciXTy8KgJ83LyzFnstWEAL4TuLBZE",
+      "eas": {
+        "projectId": "c6e7b1d4-0277-4e05-835a-9ba3203420c4"
+      }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/ac7a7604-55a2-4dfd-9275-6fe2c5524e0f"
-    },
-    "owner": "jamaimahjprs-team"
+    "owner": "jamaimahramirez"
   }
 }
