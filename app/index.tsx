@@ -12,17 +12,22 @@ import {
   TaskItem,
   FeedbackItem,
   ReferenceItem,
-} from './types';
+} from '../types';
 
 // Import Screen Components with safe fallback imports
-import * as AuthModule from './screens/AuthScreen';
-import StudentDashboardScreen from './screens/StudentDashboardScreen';
-import EducatorDashboardScreen from './screens/EducatorDashboardScreen';
+import * as AuthModule from '../screens/AuthScreen';
+import StudentDashboardScreen from '../screens/StudentDashboardScreen';
+import EducatorDashboardScreen from '../screens/EducatorDashboardScreen';
 
 // Resolve individual components safely whether default or named exports
-const SplashScreen = AuthModule.SplashScreenComponent || (AuthModule as any).SplashScreen || (AuthModule as any).default;
-const LoginScreen = AuthModule.LoginScreenComponent || (AuthModule as any).LoginScreen;
-const RoleSelectScreen = AuthModule.RoleSelectScreenComponent || (AuthModule as any).RoleSelectScreen;
+const SplashScreen =
+  AuthModule.SplashScreenComponent ||
+  (AuthModule as any).SplashScreen ||
+  (AuthModule as any).default;
+const LoginScreen =
+  AuthModule.LoginScreenComponent || (AuthModule as any).LoginScreen;
+const RoleSelectScreen =
+  AuthModule.RoleSelectScreenComponent || (AuthModule as any).RoleSelectScreen;
 
 export default function MainApp(props: SplashScreenProps) {
   // Global Navigation & User Flow States
