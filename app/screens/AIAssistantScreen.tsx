@@ -20,7 +20,7 @@ import Constants from 'expo-constants';
 const apiKey =
   process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
   Constants.expoConfig?.extra?.EXPO_PUBLIC_GEMINI_API_KEY ||
-  'AQ.Ab8RN6LK4ihmJmMBdS8JEMnY1CRatILu5fnheKcFNXG4jMnjDw';
+  'AIzaSyBqmAciXTy8KgJ83LyzFnstWEAL4TuLBZE';
 
 interface AIAssistantScreenProps {
   onBack?: () => void;
@@ -65,7 +65,7 @@ export default function AIAssistantScreen({
     author: 'John Matti',
     year: '2022',
     journal: 'Journal of Marketing Research',
-    volume: '45(3)',
+    volume: '45 (3)',
     pages: '123-136',
     doi: 'https://doi.org/10.1177/00222437211066628',
   });
@@ -90,7 +90,8 @@ export default function AIAssistantScreen({
     {
       id: 'msg_2',
       sender: 'bot',
-      text: 'Chapter 2, also known as the Review of Related Literature, usually includes:\n\n1. Theoretical Framework\n2. Related Studies\n3. Conceptual Framework\n4. Synthesis of Literature\n\nWould you like help finding related studies for your topic?',
+      text:
+        'Chapter 2, also known as the Review of Related Literature, usually includes:\n\n1. Theoretical Framework\n2. Related Studies\n3. Conceptual Framework\n4. Synthesis of Literature\n\nWould you like help finding related studies for your topic?',
     },
   ]);
 
@@ -169,7 +170,7 @@ export default function AIAssistantScreen({
       author: 'John Matti',
       year: '2022',
       journal: 'Journal of Marketing Research',
-      volume: '45(3)',
+      volume: '45 (3)',
       pages: '123-136',
       doi: 'https://doi.org/10.1177/00222437211066628',
     };
@@ -191,7 +192,7 @@ export default function AIAssistantScreen({
     setTimeout(() => setCopiedCitation(false), 3000);
   };
 
-  // REAL LIVE GEMINI AI RESPONSE GENERATOR (Direct Fetch API)
+  // REAL LIVE GEMINI AI RESPONSE GENERATOR (Fixed REST Endpoint)
   const fetchLiveGeminiResponse = async (userPrompt: string): Promise<string> => {
     try {
       if (!apiKey) {
@@ -199,7 +200,7 @@ export default function AIAssistantScreen({
       }
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
@@ -291,6 +292,7 @@ export default function AIAssistantScreen({
   const handleSaveEditedMessage = async () => {
     if (!editInputText.trim() || !selectedChatMessage) return;
     const updatedText = editInputText.trim();
+
     setShowEditModal(false);
     setIsAiLoading(true);
 
@@ -299,6 +301,7 @@ export default function AIAssistantScreen({
     setChatMessages((prev) => {
       const index = prev.findIndex((m) => m.id === selectedChatMessage.id);
       if (index === -1) return prev;
+
       const newArr = [...prev];
       newArr[index] = { ...newArr[index], text: updatedText };
       if (index + 1 < newArr.length && newArr[index + 1].sender === 'bot') {
@@ -351,6 +354,7 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'dashboard' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.dashGreetingTitle}>How can I help you today?</Text>
+
             <View style={styles.gridContainer}>
               <TouchableOpacity
                 style={[styles.gridCard, { backgroundColor: '#FECDD3' }]}
@@ -369,7 +373,7 @@ export default function AIAssistantScreen({
                 onPress={() => setActiveSubScreen('grammar')}
               >
                 <View style={styles.gridIconBox}>
-                  <Ionicons name="text-outline" size={28} color="#16434A" />
+                  <Ionicons name="text-outline" size={28} color="#166534" />
                 </View>
                 <Text style={styles.gridCardText}>Grammar Checker</Text>
               </TouchableOpacity>
@@ -443,6 +447,7 @@ export default function AIAssistantScreen({
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -503,6 +508,7 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>2%</Text>
                   </View>
+
                   <View style={styles.sourceRowItem}>
                     <View style={styles.sourceBadgeCircle}>
                       <Text style={styles.sourceBadgeText}>2</Text>
@@ -512,6 +518,7 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>6%</Text>
                   </View>
+
                   <TouchableOpacity style={styles.viewAllSourcesBtn}>
                     <Text style={styles.viewAllSourcesText}>View all sources</Text>
                   </TouchableOpacity>
@@ -530,6 +537,7 @@ export default function AIAssistantScreen({
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -596,11 +604,9 @@ export default function AIAssistantScreen({
                     </Text>
                     <View style={styles.suggestionDivider} />
                     <Text style={styles.correctedSentenceText}>
-                      Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text>{' '}
-                      <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>
-                        that the
-                      </Text>{' '}
-                      <Text style={{ color: '#D97706' }}>significant data</Text>.
+                      Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text> that the{' '}
+                      <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>data</Text>{' '}
+                      <Text style={{ color: '#D97706' }}>significant</Text>.
                     </Text>
                     <TouchableOpacity style={styles.replaceBtnTouch}>
                       <Text style={styles.replaceBtnText}>Replace</Text>
@@ -642,6 +648,7 @@ export default function AIAssistantScreen({
                   APA 7th
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -658,6 +665,7 @@ export default function AIAssistantScreen({
                   MLA 9th
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -683,7 +691,7 @@ export default function AIAssistantScreen({
                 </View>
                 <View style={{ marginLeft: 8 }}>
                   <Text style={styles.citationSuccessTitle}>Citation Generated!</Text>
-                  <Text style={styles.citationSuccessSub}>Your citation has been copied.</Text>
+                  <Text style={styles.citationSuccessSub}>Your citation has been generated.</Text>
                 </View>
               </View>
 
@@ -731,7 +739,7 @@ export default function AIAssistantScreen({
               <Text style={styles.sourceDetailRowText}>
                 Volume:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
-                  {selectedFile?.volume || '45(3)'}
+                  {selectedFile?.volume || '45 (3)'}
                 </Text>
               </Text>
               <Text style={styles.sourceDetailRowText}>
@@ -813,12 +821,14 @@ export default function AIAssistantScreen({
                 >
                   <Text style={styles.chatPromptChipText}>Find related studies</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Explain framework')}
                 >
                   <Text style={styles.chatPromptChipText}>Explain framework</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Help with methodology')}
@@ -837,10 +847,7 @@ export default function AIAssistantScreen({
                 value={chatInputText}
                 onChangeText={setChatInputText}
               />
-              <TouchableOpacity
-                style={styles.chatSendBtnTouch}
-                onPress={() => handleSendChatMessage()}
-              >
+              <TouchableOpacity style={styles.chatSendBtnTouch} onPress={() => handleSendChatMessage()}>
                 <Ionicons name="send" size={18} color="#2563EB" />
               </TouchableOpacity>
             </View>
@@ -853,6 +860,7 @@ export default function AIAssistantScreen({
         <View style={styles.modalOverlayDark}>
           <View style={styles.smallOptionsModalCard}>
             <Text style={styles.smallModalHeaderTitle}>Message Options</Text>
+
             {selectedChatMessage?.sender === 'user' && (
               <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleOpenEditModal}>
                 <Ionicons name="create-outline" size={20} color="#2563EB" />
@@ -900,6 +908,7 @@ export default function AIAssistantScreen({
               >
                 <Text style={styles.modalOptionCloseText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[styles.primaryBlueActionBtn, { flex: 1 }]}
                 onPress={handleSaveEditedMessage}
