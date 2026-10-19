@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+
 // Import Types
 import {
   SplashScreenProps,
@@ -12,24 +13,23 @@ import {
   FeedbackItem,
   ReferenceItem,
 } from './types';
-// Import Screen Components
-import {
-  SplashScreenComponent as SplashScreen,
-  LoginScreenComponent as LoginScreen,
-  RoleSelectScreenComponent as RoleSelectScreen,
-} from './screens/AuthScreen';
+
+// Import Screen Components with safe fallback imports
+import * as AuthModule from './screens/AuthScreen';
 import StudentDashboardScreen from './screens/StudentDashboardScreen';
 import EducatorDashboardScreen from './screens/EducatorDashboardScreen';
+
+// Resolve individual components safely whether default or named exports
+const SplashScreen = AuthModule.SplashScreenComponent || (AuthModule as any).SplashScreen || (AuthModule as any).default;
+const LoginScreen = AuthModule.LoginScreenComponent || (AuthModule as any).LoginScreen;
+const RoleSelectScreen = AuthModule.RoleSelectScreenComponent || (AuthModule as any).RoleSelectScreen;
 
 export default function MainApp(props: SplashScreenProps) {
   // Global Navigation & User Flow States
   const [currentScreen, setCurrentScreen] = useState<
-    | 'splash'
-    | 'login'
-    | 'roleSelect'
-    | 'studentDashboard'
-    | 'educatorDashboard'
+    'splash' | 'login' | 'roleSelect' | 'studentDashboard' | 'educatorDashboard'
   >('splash');
+
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -121,12 +121,14 @@ export default function MainApp(props: SplashScreenProps) {
       number: 4,
       title: 'Results',
       progress: 0,
+      status: 'Not Started',
     },
     {
       id: 'ch-5',
       number: 5,
       title: 'Conclusion',
       progress: 0,
+      status: 'Not Started',
     },
   ]);
 
@@ -225,12 +227,12 @@ export default function MainApp(props: SplashScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1E58A8" translucent={false} />
-      {currentScreen === 'splash' ? (
+      {currentScreen === 'splash' && SplashScreen ? (
         <SplashScreen
           onGoogleSignUp={() => setCurrentScreen('roleSelect')}
           onGoogleLogin={() => setCurrentScreen('login')}
         />
-      ) : currentScreen === 'login' ? (
+      ) : currentScreen === 'login' && LoginScreen ? (
         <LoginScreen
           loginEmail={loginEmail}
           setLoginEmail={setLoginEmail}
@@ -242,7 +244,7 @@ export default function MainApp(props: SplashScreenProps) {
           onLoginSubmit={() => setCurrentScreen('roleSelect')}
           onForgotPassword={() => {}}
         />
-      ) : currentScreen === 'roleSelect' ? (
+      ) : currentScreen === 'roleSelect' && RoleSelectScreen ? (
         <RoleSelectScreen
           selectedRole={selectedRole}
           setSelectedRole={setSelectedRole}
