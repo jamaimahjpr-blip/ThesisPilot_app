@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 
-// Import Types
+// Import Types from inside app/ folder
 import {
   SplashScreenProps,
   NotificationItem,
@@ -12,12 +12,12 @@ import {
   TaskItem,
   FeedbackItem,
   ReferenceItem,
-} from '../types';
+} from './types';
 
-// Import Screen Components with safe fallback imports
-import * as AuthModule from '../screens/AuthScreen';
-import StudentDashboardScreen from '../screens/StudentDashboardScreen';
-import EducatorDashboardScreen from '../screens/EducatorDashboardScreen';
+// Import Screen Components from inside app/screens/ folder
+import * as AuthModule from './screens/AuthScreen';
+import StudentDashboardScreen from './screens/StudentDashboardScreen';
+import EducatorDashboardScreen from './screens/EducatorDashboardScreen';
 
 // Resolve individual components safely whether default or named exports
 const SplashScreen =
