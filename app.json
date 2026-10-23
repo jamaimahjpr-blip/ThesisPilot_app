@@ -61,7 +61,9 @@
       "EXPO_PUBLIC_SUPABASE_URL": "https://wihpdrmlbfmtujhbevmg.supabase.co",
       "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaHBkcm1sYmZtdHVqaGJldm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTI2MDIsImV4cCI6MjEwNzU2ODYwMn0._WqYGk-gEeeYos7aF6XCBDqY3wSoV6gqcteBGkTw8Ts",
       "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyBqmAciXTy8KgJ83LyzFnstWEAL4TuLBZE",
-      "eas": {}
+      "eas": {
+        "projectId": "2edbf1b2-b7b3-45bd-a1b0-3acbae1ac6d5"
+      }
     },
     "runtimeVersion": {
       "policy": "appVersion"
