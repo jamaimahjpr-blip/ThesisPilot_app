@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  Modal,
-  TextInput,
-  Alert,
-  Platform,
-} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState } from 'react';
+import {
+  Alert,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface SettingsScreenProps {
   setStudentDashView?: (view: any) => void;
@@ -26,20 +26,19 @@ export default function SettingsScreen({
   onBackPress,
   onLogout,
 }: SettingsScreenProps) {
-  // Modal States
   const [activeModal, setActiveModal] = useState<
     | 'personal'
-    | 'password'
     | 'notifications'
+    | 'theme'
     | 'language'
     | 'storage'
+    | 'manage_storage_sheet'
     | 'privacy'
     | 'terms'
     | 'logout'
     | null
   >(null);
 
-  // User Profile State
   const [userInfo, setUserInfo] = useState({
     name: 'Sheldon Lee Cooper',
     email: 'cooper.sheldon@university.edu.ph',
@@ -47,14 +46,6 @@ export default function SettingsScreen({
     program: 'BS Computer Science',
   });
 
-  // Password State
-  const [passwords, setPasswords] = useState({
-    current: '',
-    newPass: '',
-    confirmPass: '',
-  });
-
-  // Notification Toggles State
   const [notifConfig, setNotifConfig] = useState({
     push: true,
     email: true,
@@ -62,46 +53,21 @@ export default function SettingsScreen({
     consultationAlerts: true,
   });
 
-  // Cache Storage State
-  const [cacheSize, setCacheSize] = useState('24.8 MB');
+  const [cacheSize, setCacheSize] = useState('200 MB');
 
-  // Handlers
   const handleSavePersonalInfo = () => {
     Alert.alert('Success', 'Personal information updated successfully.');
     setActiveModal(null);
   };
 
-  const handleChangePasswordSubmit = () => {
-    if (!passwords.current || !passwords.newPass || !passwords.confirmPass) {
-      Alert.alert('Error', 'Please fill in all password fields.');
-      return;
-    }
-    if (passwords.newPass !== passwords.confirmPass) {
-      Alert.alert('Error', 'New password and confirm password do not match.');
-      return;
-    }
-    Alert.alert('Success', 'Your password has been changed successfully.');
-    setPasswords({ current: '', newPass: '', confirmPass: '' });
-    setActiveModal(null);
-  };
-
   const handleClearCache = () => {
-    Alert.alert('Clear Cache', 'Are you sure you want to clear cached data?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear',
-        style: 'destructive',
-        onPress: () => {
-          setCacheSize('0.0 MB');
-          Alert.alert('Done', 'App cache has been cleared.');
-        },
-      },
-    ]);
+    setCacheSize('0 MB');
+    Alert.alert('Done', 'App cache has been cleared.');
+    setActiveModal(null);
   };
 
   return (
     <View style={styles.container}>
-      {/* TOP HEADER BAR */}
       <View style={styles.topHeader}>
         <TouchableOpacity
           style={styles.headerIconBtn}
@@ -121,7 +87,6 @@ export default function SettingsScreen({
         <View style={{ width: 28 }} />
       </View>
 
-      {/* MAIN WHITE CARD CONTAINER */}
       <View style={styles.whiteCardContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -131,7 +96,6 @@ export default function SettingsScreen({
             paddingBottom: 40,
           }}
         >
-          {/* SECTION 1: ACCOUNT */}
           <Text style={styles.sectionHeaderTitle}>Account</Text>
           <View style={styles.settingsGroupCard}>
             <TouchableOpacity
@@ -143,17 +107,9 @@ export default function SettingsScreen({
               <Text style={styles.settingItemLabel}>Personal Information</Text>
               <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
+
             <View style={styles.itemDivider} />
-            <TouchableOpacity
-              style={styles.settingItemRow}
-              activeOpacity={0.7}
-              onPress={() => setActiveModal('password')}
-            >
-              <Ionicons name="key-outline" size={22} color="#0F172A" />
-              <Text style={styles.settingItemLabel}>Change Password</Text>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
-            </TouchableOpacity>
-            <View style={styles.itemDivider} />
+
             <TouchableOpacity
               style={styles.settingItemRow}
               activeOpacity={0.7}
@@ -165,9 +121,21 @@ export default function SettingsScreen({
             </TouchableOpacity>
           </View>
 
-          {/* SECTION 2: APP PREFERENCES */}
           <Text style={styles.sectionHeaderTitle}>App Preferences</Text>
           <View style={styles.settingsGroupCard}>
+            <TouchableOpacity
+              style={styles.settingItemRow}
+              activeOpacity={0.7}
+              onPress={() => setActiveModal('theme')}
+            >
+              <Ionicons name="color-palette-outline" size={22} color="#0F172A" />
+              <Text style={styles.settingItemLabel}>Theme</Text>
+              <Text style={styles.settingValueText}>Default</Text>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+
+            <View style={styles.itemDivider} />
+
             <TouchableOpacity
               style={styles.settingItemRow}
               activeOpacity={0.7}
@@ -178,7 +146,9 @@ export default function SettingsScreen({
               <Text style={styles.settingValueText}>English</Text>
               <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
+
             <View style={styles.itemDivider} />
+
             <TouchableOpacity
               style={styles.settingItemRow}
               activeOpacity={0.7}
@@ -190,7 +160,6 @@ export default function SettingsScreen({
             </TouchableOpacity>
           </View>
 
-          {/* SECTION 3: PRIVACY & SECURITY */}
           <Text style={styles.sectionHeaderTitle}>Privacy & Security</Text>
           <View style={styles.settingsGroupCard}>
             <TouchableOpacity
@@ -202,7 +171,9 @@ export default function SettingsScreen({
               <Text style={styles.settingItemLabel}>Privacy Policy</Text>
               <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
             </TouchableOpacity>
+
             <View style={styles.itemDivider} />
+
             <TouchableOpacity
               style={styles.settingItemRow}
               activeOpacity={0.7}
@@ -214,7 +185,6 @@ export default function SettingsScreen({
             </TouchableOpacity>
           </View>
 
-          {/* LOGOUT BUTTON CARD */}
           <TouchableOpacity
             style={styles.logoutCardBtn}
             activeOpacity={0.8}
@@ -226,9 +196,9 @@ export default function SettingsScreen({
         </ScrollView>
       </View>
 
-      {/* MODAL 1: PERSONAL INFORMATION */}
+      {/* PERSONAL INFO MODAL */}
       <Modal visible={activeModal === 'personal'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalHeaderTitle}>Personal Information</Text>
             <Text style={styles.inputLabel}>Full Name</Text>
@@ -257,16 +227,10 @@ export default function SettingsScreen({
               onChangeText={(text) => setUserInfo({ ...userInfo, program: text })}
             />
             <View style={styles.modalActionRow}>
-              <TouchableOpacity
-                style={styles.cancelOutlineBtn}
-                onPress={() => setActiveModal(null)}
-              >
+              <TouchableOpacity style={styles.cancelOutlineBtn} onPress={() => setActiveModal(null)}>
                 <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.primaryBlueBtn}
-                onPress={handleSavePersonalInfo}
-              >
+              <TouchableOpacity style={styles.primaryBlueBtn} onPress={handleSavePersonalInfo}>
                 <Text style={styles.primaryBlueBtnText}>Save Changes</Text>
               </TouchableOpacity>
             </View>
@@ -274,56 +238,9 @@ export default function SettingsScreen({
         </View>
       </Modal>
 
-      {/* MODAL 2: CHANGE PASSWORD */}
-      <Modal visible={activeModal === 'password'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalHeaderTitle}>Change Password</Text>
-            <Text style={styles.inputLabel}>Current Password</Text>
-            <TextInput
-              style={styles.textInput}
-              secureTextEntry
-              placeholder="Enter current password"
-              value={passwords.current}
-              onChangeText={(text) => setPasswords({ ...passwords, current: text })}
-            />
-            <Text style={styles.inputLabel}>New Password</Text>
-            <TextInput
-              style={styles.textInput}
-              secureTextEntry
-              placeholder="Enter new password"
-              value={passwords.newPass}
-              onChangeText={(text) => setPasswords({ ...passwords, newPass: text })}
-            />
-            <Text style={styles.inputLabel}>Confirm New Password</Text>
-            <TextInput
-              style={styles.textInput}
-              secureTextEntry
-              placeholder="Confirm new password"
-              value={passwords.confirmPass}
-              onChangeText={(text) => setPasswords({ ...passwords, confirmPass: text })}
-            />
-            <View style={styles.modalActionRow}>
-              <TouchableOpacity
-                style={styles.cancelOutlineBtn}
-                onPress={() => setActiveModal(null)}
-              >
-                <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.primaryBlueBtn}
-                onPress={handleChangePasswordSubmit}
-              >
-                <Text style={styles.primaryBlueBtnText}>Update Password</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* MODAL 3: NOTIFICATION SETTINGS */}
+      {/* NOTIFICATIONS MODAL */}
       <Modal visible={activeModal === 'notifications'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalHeaderTitle}>Notification Settings</Text>
             <View style={styles.switchRow}>
@@ -348,18 +265,13 @@ export default function SettingsScreen({
               <Text style={styles.switchLabel}>Task Reminders</Text>
               <Switch
                 value={notifConfig.taskReminders}
-                onValueChange={(val) =>
-                  setNotifConfig({ ...notifConfig, taskReminders: val })
-                }
+                onValueChange={(val) => setNotifConfig({ ...notifConfig, taskReminders: val })}
                 trackColor={{ false: '#CBD5E1', true: '#BFDBFE' }}
                 thumbColor={notifConfig.taskReminders ? '#1E58A8' : '#F1F5F9'}
               />
             </View>
             <View style={styles.modalActionRow}>
-              <TouchableOpacity
-                style={styles.cancelOutlineBtn}
-                onPress={() => setActiveModal(null)}
-              >
+              <TouchableOpacity style={styles.cancelOutlineBtn} onPress={() => setActiveModal(null)}>
                 <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -376,90 +288,173 @@ export default function SettingsScreen({
         </View>
       </Modal>
 
-      {/* MODAL 4: LANGUAGE */}
+      {/* THEME MODAL (DEFAULT MODE ONLY) */}
+      <Modal visible={activeModal === 'theme'} transparent animationType="fade">
+        <View style={styles.modaloverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalHeaderTitle}>Select App Theme</Text>
+            <TouchableOpacity style={styles.switchRow} onPress={() => setActiveModal(null)}>
+              <Text style={styles.switchLabel}>Default Mode</Text>
+              <Ionicons name="radio-button-on" size={20} color="#1E58A8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.closeFullWidthBtn} onPress={() => setActiveModal(null)}>
+              <Text style={styles.closeFullWidthBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* LANGUAGE MODAL */}
       <Modal visible={activeModal === 'language'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalHeaderTitle}>Language</Text>
             <Text style={styles.modalBodyText}>
               Currently, English is the primary supported language for ThesisPilot.
             </Text>
-            <TouchableOpacity
-              style={styles.closeFullWidthBtn}
-              onPress={() => setActiveModal(null)}
-            >
+            <TouchableOpacity style={styles.closeFullWidthBtn} onPress={() => setActiveModal(null)}>
               <Text style={styles.closeFullWidthBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* MODAL 5: DATA & STORAGE */}
-      <Modal visible={activeModal === 'storage'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalHeaderTitle}>Data & Storage</Text>
-            <View style={styles.storageInfoRow}>
-              <Text style={styles.storageInfoLabel}>Temporary Cache Size:</Text>
-              <Text style={styles.storageInfoVal}>{cacheSize}</Text>
+      {/* DATA & STORAGE MODAL (3rd PHOTO) */}
+      <Modal visible={activeModal === 'storage'} transparent animationType="slide">
+        <View style={styles.storageModalContainer}>
+          <View style={styles.storageHeaderBar}>
+            <TouchableOpacity onPress={() => setActiveModal(null)}>
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <Text style={styles.storageHeaderTitle}>Storage & Data</Text>
+            <View style={{ width: 24 }} />
+          </View>
+
+          <View style={styles.storageWhiteCardContainer}>
+            <TouchableOpacity
+              style={styles.cloudStorageCard}
+              onPress={() => setActiveModal('manage_storage_sheet')}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="cloud-outline" size={28} color="#1E58A8" style={{ marginRight: 12 }} />
+                  <View>
+                    <Text style={styles.cloudCardTitle}>Cloud Storage</Text>
+                    <Text style={styles.cloudCardSub}>2.45 GB of 10 GB used (Tap to open files)</Text>
+                  </View>
+                </View>
+                <Text style={styles.cloudCardPercent}>24%</Text>
+              </View>
+            </TouchableOpacity>
+
+            <Text style={styles.breakdownHeaderTitle}>Storage Breakdown</Text>
+            <View style={styles.breakdownBox}>
+              <View style={styles.breakdownRow}>
+                <Ionicons name="document-outline" size={20} color="#0F172A" />
+                <Text style={styles.breakdownLabel}>Files</Text>
+                <Text style={styles.breakdownValue}>1.25 GB</Text>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Ionicons name="book-outline" size={20} color="#0F172A" />
+                <Text style={styles.breakdownLabel}>Notes</Text>
+                <Text style={styles.breakdownValue}>680 MB</Text>
+              </View>
+              <View style={styles.breakdownRow}>
+                <Ionicons name="attach-outline" size={20} color="#0F172A" />
+                <Text style={styles.breakdownLabel}>Chat Attachments</Text>
+                <Text style={styles.breakdownValue}>320 MB</Text>
+              </View>
+              <View style={[styles.breakdownRow, { borderBottomWidth: 0 }]}>
+                <Ionicons name="folder-outline" size={20} color="#0F172A" />
+                <Text style={styles.breakdownLabel}>Other Data</Text>
+                <Text style={styles.breakdownValue}>200 MB</Text>
+              </View>
             </View>
-            <TouchableOpacity style={styles.clearCacheBtn} onPress={handleClearCache}>
-              <Ionicons name="trash-outline" size={18} color="#EF4444" style={{ marginRight: 6 }} />
-              <Text style={styles.clearCacheBtnText}>Clear Cache</Text>
-            </TouchableOpacity>
+
             <TouchableOpacity
-              style={styles.closeFullWidthBtn}
-              onPress={() => setActiveModal(null)}
+              style={styles.manageStorageBtn}
+              onPress={() => setActiveModal('manage_storage_sheet')}
             >
-              <Text style={styles.closeFullWidthBtnText}>Close</Text>
+              <Text style={styles.manageStorageBtnText}>Manage Storage</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* MODAL 6: PRIVACY POLICY */}
+      {/* MANAGE STORAGE BOTTOM SHEET MODAL (8th PHOTO) */}
+      <Modal visible={activeModal === 'manage_storage_sheet'} transparent animationType="slide">
+        <TouchableOpacity
+          style={styles.modaloverlay}
+          activeOpacity={1}
+          onPress={() => setActiveModal('storage')}
+        >
+          <View style={styles.bottomSheetCard}>
+            <View style={styles.sheetHandle} />
+            <Text style={styles.sheetTitle}>Manage Storage</Text>
+
+            <TouchableOpacity
+              style={styles.sheetOptionRow}
+              onPress={() => {
+                setActiveModal(null);
+                if (setStudentDashView) setStudentDashView('files');
+              }}
+            >
+              <Ionicons name="folder-outline" size={22} color="#1E58A8" style={{ marginRight: 12 }} />
+              <Text style={styles.sheetOptionText}>Open File Repository</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.sheetOptionRow} onPress={handleClearCache}>
+              <Ionicons name="trash-bin-outline" size={22} color="#EF4444" style={{ marginRight: 12 }} />
+              <Text style={[styles.sheetOptionText, { color: '#EF4444' }]}>Clear Cache ({cacheSize})</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.sheetCancelBtn}
+              onPress={() => setActiveModal('storage')}
+            >
+              <Text style={styles.sheetCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* PRIVACY & TERMS */}
       <Modal visible={activeModal === 'privacy'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalHeaderTitle}>Privacy Policy</Text>
             <ScrollView style={{ maxHeight: 250, marginBottom: 12 }}>
               <Text style={styles.legalBodyText}>
-                ThesisPilot values your privacy. Your research notes, document drafts, and group assessments are stored securely. We do not share your personal academic data with unauthorized third parties.
+                ThesisPilot values your privacy. Your research notes, document drafts, and group assessments are stored securely.
               </Text>
             </ScrollView>
-            <TouchableOpacity
-              style={styles.closeFullWidthBtn}
-              onPress={() => setActiveModal(null)}
-            >
+            <TouchableOpacity style={styles.closeFullWidthBtn} onPress={() => setActiveModal(null)}>
               <Text style={styles.closeFullWidthBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* MODAL 7: TERMS OF SERVICE */}
       <Modal visible={activeModal === 'terms'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalHeaderTitle}>Terms of Service</Text>
             <ScrollView style={{ maxHeight: 250, marginBottom: 12 }}>
               <Text style={styles.legalBodyText}>
-                By using ThesisPilot, you agree to academic integrity standards. All group assessments and submission progress logged in this platform must accurately reflect authentic student contributions.
+                By using ThesisPilot, you agree to academic integrity standards.
               </Text>
             </ScrollView>
-            <TouchableOpacity
-              style={styles.closeFullWidthBtn}
-              onPress={() => setActiveModal(null)}
-            >
+            <TouchableOpacity style={styles.closeFullWidthBtn} onPress={() => setActiveModal(null)}>
               <Text style={styles.closeFullWidthBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* MODAL 8: LOGOUT CONFIRMATION */}
+      {/* LOGOUT CONFIRMATION */}
       <Modal visible={activeModal === 'logout'} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={styles.modaloverlay}>
           <View style={styles.logoutBlueCard}>
             <Text style={styles.logoutModalTitle}>Log Out</Text>
             <Text style={styles.logoutModalSubText}>Are you sure you want to logout?</Text>
@@ -572,7 +567,7 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     marginLeft: 12,
   },
-  modalOverlay: {
+  modaloverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
@@ -669,35 +664,6 @@ const styles = StyleSheet.create({
     color: '#475569',
     lineHeight: 18,
   },
-  storageInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  storageInfoLabel: {
-    fontSize: 13,
-    color: '#475569',
-  },
-  storageInfoVal: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#0F172A',
-  },
-  clearCacheBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  clearCacheBtnText: {
-    color: '#EF4444',
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
   legalBodyText: {
     fontSize: 12,
     color: '#475569',
@@ -746,5 +712,143 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  storageModalContainer: {
+    flex: 1,
+    backgroundColor: '#1E58A8',
+  },
+  storageHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 40 : 52,
+    paddingBottom: 16,
+  },
+  storageHeaderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  storageWhiteCardContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  cloudStorageCard: {
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 20,
+  },
+  cloudCardTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  cloudCardSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  cloudCardPercent: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  breakdownHeaderTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 10,
+  },
+  breakdownBox: {
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  breakdownLabel: {
+    fontSize: 14,
+    color: '#0F172A',
+    marginLeft: 12,
+    flex: 1,
+  },
+  breakdownValue: {
+    fontSize: 13,
+    color: '#64748B',
+  },
+  manageStorageBtn: {
+    borderWidth: 1,
+    borderColor: '#1E58A8',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  manageStorageBtnText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1E58A8',
+  },
+  bottomSheetCard: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#CBD5E1',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0F172A',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  sheetOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  sheetOptionText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  sheetCancelBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  sheetCancelText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#475569',
   },
 });

@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  Platform,
-  Clipboard,
-  TextInput,
-  Modal,
-  ActivityIndicator,
-} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as DocumentPicker from 'expo-document-picker';
 import Constants from 'expo-constants';
+import * as DocumentPicker from 'expo-document-picker';
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Clipboard,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 // Multi-fallback strategy for Expo / EAS production build keys
 const apiKey =
   process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
   Constants.expoConfig?.extra?.EXPO_PUBLIC_GEMINI_API_KEY ||
-  'AIzaSyBqmAciXTy8KgJ83LyzFnstWEAL4TuLBZE';
+  'AIzaSyBqmAciXTy8KgJ83LyzFnstWEAL4TULBZE';
 
 interface AIAssistantScreenProps {
   onBack?: () => void;
@@ -45,7 +45,19 @@ interface ChatMessage {
   id: string;
   sender: 'user' | 'bot';
   text: string;
+  isError?: boolean;
 }
+
+// Academic Keywords list for topic validation
+const ACADEMIC_KEYWORDS = [
+  'thesis', 'research', 'chapter', 'methodology', 'literature', 'rrl', 'citation',
+  'apa', 'mla', 'chicago', 'abstract', 'introduction', 'conclusion', 'defense',
+  'proposal', 'study', 'studies', 'variables', 'data', 'analysis', 'survey', 'questionnaire',
+  'academic', 'grammar', 'proofread', 'title', 'statement of the problem', 'sop',
+  'reference', 'bibliography', 'qualitative', 'quantitative', 'scope', 'delimitation',
+  'framework', 'hypothesis', 'sample', 'population', 'statistical', 'school', 'university',
+  'find', 'explain', 'help', 'summarize', 'project', 'related'
+];
 
 export default function AIAssistantScreen({
   onBack,
@@ -192,7 +204,7 @@ export default function AIAssistantScreen({
     setTimeout(() => setCopiedCitation(false), 3000);
   };
 
-  // REAL LIVE GEMINI AI RESPONSE GENERATOR
+  // REAL LIVE GEMINI AI RESPONSE GENERATOR (UPDATED API ENDPOINT)
   const fetchLiveGeminiResponse = async (userPrompt: string): Promise<string> => {
     try {
       if (!apiKey) {
@@ -200,18 +212,14 @@ export default function AIAssistantScreen({
       }
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: userPrompt }],
-              },
-            ],
+            contents: [{ parts: [{ text: userPrompt }] }],
             systemInstruction: {
               parts: [
                 {
@@ -238,6 +246,17 @@ export default function AIAssistantScreen({
     }
   };
 
+  // CHECK IF QUERY IS STRICTLY ACADEMIC
+  const isAcademicQuery = (query: string): boolean => {
+    const cleanQuery = query.toLowerCase();
+    const hasKeyword = ACADEMIC_KEYWORDS.some((kw) => cleanQuery.includes(kw));
+
+    if (hasKeyword || cleanQuery.length > 15) {
+      return true;
+    }
+    return false;
+  };
+
   const handleSendChatMessage = async (textToSend?: string) => {
     const query = textToSend || chatInputText;
     if (!query.trim() || isAiLoading) return;
@@ -253,16 +272,28 @@ export default function AIAssistantScreen({
 
     setChatMessages((prev) => [...prev, newUsersMsg]);
     if (!textToSend) setChatInputText('');
+
+    // Academic Guard Check (English Rejection Prompt)
+    if (!isAcademicQuery(query)) {
+      setTimeout(() => {
+        const errorBotMsg: ChatMessage = {
+          id: botMsgId,
+          sender: 'bot',
+          text: '⚠️ Sorry, I can only assist with academic, thesis, and research-related topics. Please ask a school or research-related question.',
+          isError: true,
+        };
+        setChatMessages((prev) => [...prev, errorBotMsg]);
+      }, 300);
+      return;
+    }
+
     setIsAiLoading(true);
-
     const liveBotText = await fetchLiveGeminiResponse(query);
-
     const newBotMsg: ChatMessage = {
       id: botMsgId,
       sender: 'bot',
       text: liveBotText,
     };
-
     setChatMessages((prev) => [...prev, newBotMsg]);
     setIsAiLoading(false);
   };
@@ -291,9 +322,28 @@ export default function AIAssistantScreen({
   const handleSaveEditedMessage = async () => {
     if (!editInputText.trim() || !selectedChatMessage) return;
     const updatedText = editInputText.trim();
-    setShowEditModal(false);
-    setIsAiLoading(true);
 
+    setShowEditModal(false);
+
+    if (!isAcademicQuery(updatedText)) {
+      setChatMessages((prev) => {
+        const index = prev.findIndex((m) => m.id === selectedChatMessage.id);
+        if (index === -1) return prev;
+        const newArr = [...prev];
+        newArr[index] = { ...newArr[index], text: updatedText };
+        if (index + 1 < newArr.length && newArr[index + 1].sender === 'bot') {
+          newArr[index + 1] = {
+            ...newArr[index + 1],
+            text: '⚠️ Sorry, I can only assist with academic, thesis, and research-related topics. Please ask a school or research-related question.',
+            isError: true,
+          };
+        }
+        return newArr;
+      });
+      return;
+    }
+
+    setIsAiLoading(true);
     const newBotResponse = await fetchLiveGeminiResponse(updatedText);
 
     setChatMessages((prev) => {
@@ -302,7 +352,7 @@ export default function AIAssistantScreen({
       const newArr = [...prev];
       newArr[index] = { ...newArr[index], text: updatedText };
       if (index + 1 < newArr.length && newArr[index + 1].sender === 'bot') {
-        newArr[index + 1] = { ...newArr[index + 1], text: newBotResponse };
+        newArr[index + 1] = { ...newArr[index + 1], text: newBotResponse, isError: false };
       }
       return newArr;
     });
@@ -351,6 +401,7 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'dashboard' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.dashGreetingTitle}>How can I help you today?</Text>
+
             <View style={styles.gridContainer}>
               <TouchableOpacity
                 style={[styles.gridCard, { backgroundColor: '#FECDD3' }]}
@@ -438,11 +489,13 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'plagiarism' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.subScreenHeaderLabel}>Upload or Paste Text</Text>
+
             <View style={styles.uploadBtnRow}>
               <TouchableOpacity style={styles.uploadActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -481,11 +534,14 @@ export default function AIAssistantScreen({
                 <View style={styles.resultsCardBox}>
                   <Text style={styles.originalPercentageText}>92%</Text>
                   <Text style={styles.originalStatusSubText}>Original Content</Text>
+
                   <View style={styles.dividerLine} />
+
                   <View style={styles.legendRow}>
                     <View style={[styles.colorSquare, { backgroundColor: '#22C55E' }]} />
                     <Text style={styles.legendText}>92% Original</Text>
                   </View>
+
                   <View style={[styles.legendRow, { marginTop: 6 }]}>
                     <View style={[styles.colorSquare, { backgroundColor: '#EF4444' }]} />
                     <Text style={styles.legendText}>8% Potentially Plagiarized</Text>
@@ -503,6 +559,7 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>2%</Text>
                   </View>
+
                   <View style={styles.sourceRowItem}>
                     <View style={styles.sourceBadgeCircle}>
                       <Text style={styles.sourceBadgeText}>2</Text>
@@ -512,6 +569,7 @@ export default function AIAssistantScreen({
                     </Text>
                     <Text style={styles.sourcePercentText}>6%</Text>
                   </View>
+
                   <TouchableOpacity style={styles.viewAllSourcesBtn}>
                     <Text style={styles.viewAllSourcesText}>View all sources</Text>
                   </TouchableOpacity>
@@ -525,11 +583,13 @@ export default function AIAssistantScreen({
         {activeSubScreen === 'grammar' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Text style={styles.subScreenHeaderLabel}>Upload or Paste Text</Text>
+
             <View style={styles.uploadBtnRow}>
               <TouchableOpacity style={styles.uploadActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="cloud-upload-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.uploadBtnText}>Upload File</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.pasteActionBtn} onPress={handlePickDocument}>
                 <Ionicons name="copy-outline" size={20} color="#1D4ED8" />
                 <Text style={styles.pasteBtnText}>Paste Text</Text>
@@ -570,15 +630,19 @@ export default function AIAssistantScreen({
                     <Text style={styles.issuesCountNumber}>12</Text>
                     <Text style={styles.issuesCountLabel}>Issues Found</Text>
                   </View>
+
                   <View style={styles.verticalDivider} />
+
                   <View style={styles.grammarBreakdownCol}>
                     <Text style={styles.breakdownVal}>6</Text>
                     <Text style={styles.breakdownLabel}>Grammar</Text>
                   </View>
+
                   <View style={styles.grammarBreakdownCol}>
                     <Text style={styles.breakdownVal}>4</Text>
                     <Text style={styles.breakdownLabel}>Punctuation</Text>
                   </View>
+
                   <View style={styles.grammarBreakdownCol}>
                     <Text style={styles.breakdownVal}>2</Text>
                     <Text style={styles.breakdownLabel}>Spelling</Text>
@@ -590,16 +654,20 @@ export default function AIAssistantScreen({
                   <View style={styles.suggestionIconBox}>
                     <Ionicons name="bulb-outline" size={24} color="#1D4ED8" />
                   </View>
+
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={styles.originalSentenceText}>
                       Original: The results shows that the data are significant.
                     </Text>
+
                     <View style={styles.suggestionDivider} />
+
                     <Text style={styles.correctedSentenceText}>
                       Suggestion: The Results <Text style={{ color: '#16A34A' }}>show</Text> that the{' '}
                       <Text style={{ color: '#EF4444', textDecorationLine: 'line-through' }}>data</Text>{' '}
-                      <Text style={{ color: '#D97706' }}>are significant</Text>.
+                      significant <Text style={{ color: '#D97706' }}>are</Text>.
                     </Text>
+
                     <TouchableOpacity style={styles.replaceBtnTouch}>
                       <Text style={styles.replaceBtnText}>Replace</Text>
                     </TouchableOpacity>
@@ -640,6 +708,7 @@ export default function AIAssistantScreen({
                   APA 7th
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -656,6 +725,7 @@ export default function AIAssistantScreen({
                   MLA 9th
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.citationTabBtn,
@@ -684,8 +754,10 @@ export default function AIAssistantScreen({
                   <Text style={styles.citationSuccessSub}>Your citation has been generated.</Text>
                 </View>
               </View>
+
               <View style={styles.citationTextInnerBox}>
                 <Text style={styles.generatedCitationText}>{getGeneratedCitationText()}</Text>
+
                 <TouchableOpacity
                   style={styles.copyCitationBtn}
                   activeOpacity={0.8}
@@ -701,36 +773,42 @@ export default function AIAssistantScreen({
 
             <View style={styles.sourceDetailsCard}>
               <Text style={styles.sourceDetailsHeaderTitle}>Source Details</Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Title:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
                   {selectedFile?.title || 'The impact of social media on consumer behavior'}
                 </Text>
               </Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Author:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
                   {selectedFile?.author || 'John Matti'}
                 </Text>
               </Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Year:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
                   {selectedFile?.year || '2022'}
                 </Text>
               </Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Journal:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
                   {selectedFile?.journal || 'Journal of Marketing Research'}
                 </Text>
               </Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Volume:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
                   {selectedFile?.volume || '45 (3)'}
                 </Text>
               </Text>
+
               <Text style={styles.sourceDetailRowText}>
                 Pages:{' '}
                 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>
@@ -744,7 +822,10 @@ export default function AIAssistantScreen({
         {/* SUB-SCREEN 5: CHATBOT ASSISTANT */}
         {activeSubScreen === 'chatbot' && (
           <View style={{ flex: 1 }}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+            >
               {/* GREETING BANNER */}
               <View style={styles.chatbotGreetingBanner}>
                 <View style={styles.botAvatarBadge}>
@@ -768,20 +849,31 @@ export default function AIAssistantScreen({
                   ]}
                 >
                   {msg.sender === 'bot' && (
-                    <View style={styles.botInlineAvatar}>
-                      <Ionicons name="hardware-chip" size={18} color="#2563EB" />
+                    <View
+                      style={[
+                        styles.botInlineAvatar,
+                        msg.isError && { backgroundColor: '#FEE2E2' },
+                      ]}
+                    >
+                      <Ionicons
+                        name={msg.isError ? 'alert-circle' : 'hardware-chip'}
+                        size={18}
+                        color={msg.isError ? '#DC2626' : '#2563EB'}
+                      />
                     </View>
                   )}
                   <View
                     style={[
                       styles.chatBubbleBox,
                       msg.sender === 'user' ? styles.userBubbleBox : styles.botBubbleBox,
+                      msg.isError && { backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FCA5A5' },
                     ]}
                   >
                     <Text
                       style={[
                         styles.chatBubbleText,
                         msg.sender === 'user' ? styles.userBubbleText : styles.botBubbleText,
+                        msg.isError && { color: '#991B1B' },
                       ]}
                     >
                       {msg.text}
@@ -810,12 +902,14 @@ export default function AIAssistantScreen({
                 >
                   <Text style={styles.chatPromptChipText}>Find related studies</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Explain framework')}
                 >
                   <Text style={styles.chatPromptChipText}>Explain framework</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.chatPromptChipBtn}
                   onPress={() => handleSendChatMessage('Help with methodology')}
@@ -850,18 +944,21 @@ export default function AIAssistantScreen({
         <View style={styles.modalOverlayDark}>
           <View style={styles.smallOptionsModalCard}>
             <Text style={styles.smallModalHeaderTitle}>Message Options</Text>
+
             {selectedChatMessage?.sender === 'user' && (
               <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleOpenEditModal}>
                 <Ionicons name="create-outline" size={20} color="#2563EB" />
                 <Text style={styles.modalOptionLabelText}>Edit Message</Text>
               </TouchableOpacity>
             )}
+
             <TouchableOpacity style={styles.modalOptionRowItem} onPress={handleDeleteChatMessage}>
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
               <Text style={[styles.modalOptionLabelText, { color: '#EF4444' }]}>
                 Delete Message
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.modalOptionCloseBtn}
               onPress={() => {
@@ -897,6 +994,7 @@ export default function AIAssistantScreen({
               >
                 <Text style={styles.modalOptionCloseText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[styles.primaryBlueActionBtn, { flex: 1 }]}
                 onPress={handleSaveEditedMessage}

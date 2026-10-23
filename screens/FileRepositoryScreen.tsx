@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
+  Alert,
+  Modal,
+  Platform,
   ScrollView,
   StyleSheet,
-  Platform,
+  Text,
   TextInput,
-  Modal,
-  Alert,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export interface FileFolderItem {
   id: string;
   name: string;
   fileCount?: number;
   type: 'folder';
+  uploadTime?: number;
 }
 
 export interface FileDocumentItem {
@@ -26,9 +27,10 @@ export interface FileDocumentItem {
   size: string;
   extension: 'pdf' | 'xlsx' | 'docx';
   type: 'file';
+  uploadTime?: number;
 }
 
-type RepositoryItem = FileFolderItem | FileDocumentItem;
+export type RepositoryItem = FileFolderItem | FileDocumentItem;
 
 interface FileRepositoryScreenProps {
   setStudentDashView?: (view: any) => void;
@@ -41,14 +43,15 @@ export default function FileRepositoryScreen({
 }: FileRepositoryScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
-  // Initial Mock Repository Data matching the UI design exactly
   const initialFolders: FileFolderItem[] = [
-    { id: 'fol-1', name: 'Chapter 1 Introduction', fileCount: 5, type: 'folder' },
-    { id: 'fol-2', name: 'Chapter 2 Literature Review', fileCount: 8, type: 'folder' },
-    { id: 'fol-3', name: 'Chapter 3 Methodology', fileCount: 6, type: 'folder' },
-    { id: 'fol-4', name: 'Chapter 4 Results', fileCount: 4, type: 'folder' },
-    { id: 'fol-5', name: 'Chapter 5 Conclusion', fileCount: 3, type: 'folder' },
+    { id: 'fol-1', name: 'Chapter 1 Introduction', fileCount: 5, type: 'folder', uploadTime: 1 },
+    { id: 'fol-2', name: 'Chapter 2 Literature Review', fileCount: 8, type: 'folder', uploadTime: 2 },
+    { id: 'fol-3', name: 'Chapter 3 Methodology', fileCount: 6, type: 'folder', uploadTime: 3 },
+    { id: 'fol-4', name: 'Chapter 4 Results', fileCount: 4, type: 'folder', uploadTime: 4 },
+    { id: 'fol-5', name: 'Chapter 5 Conclusion', fileCount: 3, type: 'folder', uploadTime: 5 },
   ];
 
   const initialFiles: FileDocumentItem[] = [
@@ -59,6 +62,7 @@ export default function FileRepositoryScreen({
       size: '2.4 MB',
       extension: 'pdf',
       type: 'file',
+      uploadTime: 10,
     },
     {
       id: 'doc-2',
@@ -67,6 +71,7 @@ export default function FileRepositoryScreen({
       size: '1.1 MB',
       extension: 'xlsx',
       type: 'file',
+      uploadTime: 12,
     },
     {
       id: 'doc-3',
@@ -75,19 +80,27 @@ export default function FileRepositoryScreen({
       size: '856 KB',
       extension: 'docx',
       type: 'file',
+      uploadTime: 8,
     },
   ];
 
-  const [foldersList, setFoldersList] = useState<FileFolderItem[]>(initialFolders);
-  const [filesList, setFilesList] = useState<FileDocumentItem[]>(initialFiles);
+  const [foldersList] = useState<FileFolderItem[]>(initialFolders);
+  const [filesList] = useState<FileDocumentItem[]>(initialFiles);
 
-  // Filter List based on Search Bar Query
   const filteredFolders = foldersList.filter((f) =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   const filteredFiles = filesList.filter((f) =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (sortOrder === 'newest') {
+    filteredFolders.sort((a, b) => (b.uploadTime || 0) - (a.uploadTime || 0));
+    filteredFiles.sort((a, b) => (b.uploadTime || 0) - (a.uploadTime || 0));
+  } else {
+    filteredFolders.sort((a, b) => (a.uploadTime || 0) - (b.uploadTime || 0));
+    filteredFiles.sort((a, b) => (a.uploadTime || 0) - (b.uploadTime || 0));
+  }
 
   const handleOptionsPress = (item: RepositoryItem) => {
     Alert.alert('File Actions', `Selected: ${item.name}`, [
@@ -125,7 +138,6 @@ export default function FileRepositoryScreen({
 
   return (
     <View style={styles.screenContainer}>
-      {/* Top Header Title Bar */}
       <View style={styles.topHeaderBar}>
         <View style={styles.headerLeftRow}>
           <TouchableOpacity
@@ -143,28 +155,15 @@ export default function FileRepositoryScreen({
           <Text style={styles.headerTitleText}>Files</Text>
         </View>
         <View style={styles.headerRightRow}>
-          <TouchableOpacity style={{ padding: 6 }}>
+          <TouchableOpacity style={{ padding: 6 }} onPress={() => setShowFilterModal(true)}>
             <Ionicons name="funnel-outline" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ padding: 6 }}
-            onPress={() => setShowUploadModal(true)}
-          >
-            <Ionicons name="cloud-upload-outline" size={22} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Main White Content Card */}
       <View style={styles.contentCard}>
-        {/* Search Bar Input Container */}
         <View style={styles.searchBarBox}>
-          <Ionicons
-            name="search-outline"
-            size={18}
-            color="#94A3B8"
-            style={{ marginRight: 8 }}
-          />
+          <Ionicons name="search-outline" size={18} color="#94A3B8" style={{ marginRight: 8 }} />
           <TextInput
             style={styles.searchInputText}
             placeholder="Search files..."
@@ -177,18 +176,16 @@ export default function FileRepositoryScreen({
               <Ionicons name="close-circle" size={18} color="#64748B" />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowFilterModal(true)}>
               <Ionicons name="funnel-outline" size={18} color="#94A3B8" />
             </TouchableOpacity>
           )}
         </View>
 
-        {/* Scrollable File & Folder List */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100, paddingTop: 10 }}
         >
-          {/* Folders List */}
           {filteredFolders.map((folder) => (
             <TouchableOpacity
               key={folder.id}
@@ -196,26 +193,17 @@ export default function FileRepositoryScreen({
               activeOpacity={0.7}
               onPress={() => handleOptionsPress(folder)}
             >
-              <FontAwesome5
-                name="folder"
-                size={32}
-                color="#E59E0B"
-                style={{ marginRight: 14 }}
-              />
+              <FontAwesome5 name="folder" size={32} color="#E59E0B" style={{ marginRight: 14 }} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.itemTitleText}>{folder.name}</Text>
                 <Text style={styles.itemSubText}>{folder.fileCount} files</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => handleOptionsPress(folder)}
-                style={{ padding: 6 }}
-              >
+              <TouchableOpacity onPress={() => handleOptionsPress(folder)} style={{ padding: 6 }}>
                 <Ionicons name="ellipsis-vertical" size={18} color="#000000" />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
 
-          {/* Documents List */}
           {filteredFiles.map((file) => (
             <TouchableOpacity
               key={file.id}
@@ -230,21 +218,56 @@ export default function FileRepositoryScreen({
                   {file.date} • {file.size}
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={() => handleOptionsPress(file)}
-                style={{ padding: 6 }}
-              >
+              <TouchableOpacity onPress={() => handleOptionsPress(file)} style={{ padding: 6 }}>
                 <Ionicons name="ellipsis-vertical" size={18} color="#000000" />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        {/* Floating AI Assistant Mascot Button */}
         <TouchableOpacity style={styles.floatingAiButton} activeOpacity={0.85}>
           <MaterialCommunityIcons name="robot" size={28} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
+
+      {/* FILTER MODAL */}
+      <Modal visible={showFilterModal} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlayDark}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+        >
+          <View style={styles.modalWhiteCard}>
+            <Text style={styles.modalHeaderTitle}>Sort Files By</Text>
+
+            <TouchableOpacity
+              style={styles.filterOptionRow}
+              onPress={() => {
+                setSortOrder('newest');
+                setShowFilterModal(false);
+              }}
+            >
+              <Text style={styles.filterOptionText}>Newest</Text>
+              {sortOrder === 'newest' && <Ionicons name="checkmark" size={18} color="#1E58A8" />}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.filterOptionRow}
+              onPress={() => {
+                setSortOrder('oldest');
+                setShowFilterModal(false);
+              }}
+            >
+              <Text style={styles.filterOptionText}>Oldest</Text>
+              {sortOrder === 'oldest' && <Ionicons name="checkmark" size={18} color="#1E58A8" />}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowFilterModal(false)}>
+              <Text style={styles.cancelBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* UPLOAD FILE MODAL */}
       <Modal visible={showUploadModal} transparent animationType="fade">
@@ -259,14 +282,9 @@ export default function FileRepositoryScreen({
               }}
             >
               <Ionicons name="cloud-upload-outline" size={36} color="#1E58A8" />
-              <Text style={styles.uploadDashedText}>
-                Tap to select PDF, XLSX or DOCX file
-              </Text>
+              <Text style={styles.uploadDashedText}>Tap to select PDF, XLSX or DOCX file</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={() => setShowUploadModal(false)}
-            >
+            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowUploadModal(false)}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -299,7 +317,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   headerRightRow: {
     flexDirection: 'row',
@@ -328,7 +345,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: '#000000',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   repositoryItemRow: {
     flexDirection: 'row',
@@ -339,13 +355,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
     color: '#000000',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   itemSubText: {
     fontSize: 10,
     color: '#94A3B8',
     marginTop: 2,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   fileIconBadge: {
     width: 36,
@@ -360,7 +374,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginTop: 2,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   floatingAiButton: {
     position: 'absolute',
@@ -373,10 +386,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
   },
   modalOverlayDark: {
     flex: 1,
@@ -396,7 +405,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0F172A',
     marginBottom: 14,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  filterOptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  filterOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0F172A',
   },
   dashedUploadBox: {
     borderWidth: 1.5,
@@ -414,7 +435,6 @@ const styles = StyleSheet.create({
     color: '#1E58A8',
     fontWeight: 'bold',
     marginTop: 8,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   cancelBtn: {
     paddingVertical: 10,
@@ -422,11 +442,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#CBD5E1',
+    marginTop: 10,
   },
   cancelBtnText: {
     fontSize: 12,
     color: '#475569',
     fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
 });

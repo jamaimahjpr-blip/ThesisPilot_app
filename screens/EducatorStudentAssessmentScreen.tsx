@@ -1,502 +1,458 @@
-import React, { useState } from 'react';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useState } from 'react';
 import {
-  View,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  TextInput,
-  Alert,
-  Platform,
-  Linking,
+  View,
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-export interface CalendarEvent {
+export interface StudentPeerAssessment {
   id: string;
-  title: string;
-  time: string;
-  dateStr: string; // YYYY-MM-DD format
-  scheduledBy: string;
-  hasMeet?: boolean;
-  meetLink?: string;
-  dotColor?: string;
+  name: string;
+  avatar: string;
+  contributionSubtext: string;
+  ratingLabel: 'Bad' | 'Good' | 'Fair' | 'Excellent' | 'No Work';
+  ratingColor: string;
+  scores: {
+    contribution: number;
+    quality: number;
+    communication: number;
+    teamwork: number;
+    initiative: number;
+  };
+  overallScore: string;
+  overallStatus: string;
 }
 
-interface EducatorTaskManagementScreenProps {
+interface ThesisGroupAssessment {
+  id: string;
+  title: string;
+  chapter: string;
+  assessments: StudentPeerAssessment[];
+}
+
+interface EducatorStudentAssessmentScreenProps {
   onBack: () => void;
   setEducatorDashView?: (view: 'dashboard' | 'chat' | 'profile') => void;
 }
 
-export default function EducatorTaskManagementScreen({
+const SAMPLE_GROUPS_ASSESSMENTS: ThesisGroupAssessment[] = [
+  {
+    id: '1',
+    title: "Cooper's Thesis Group",
+    chapter: 'Chapter 3: Methodology',
+    assessments: [
+      {
+        id: '1',
+        name: 'Wally Bayola',
+        avatar: 'https://i.pravatar.cc/100?img=12',
+        contributionSubtext: 'Rate the contribution of Wally',
+        ratingLabel: 'Bad',
+        ratingColor: '#EF4444',
+        scores: { contribution: 1, quality: 1, communication: 1, teamwork: 1, initiative: 1 },
+        overallScore: '1/5',
+        overallStatus: 'Needs Work',
+      },
+      {
+        id: '2',
+        name: 'Apple David',
+        avatar: 'https://i.pravatar.cc/100?img=5',
+        contributionSubtext: 'Rate the contribution of Apple',
+        ratingLabel: 'Good',
+        ratingColor: '#22C55E',
+        scores: { contribution: 4, quality: 4, communication: 4, teamwork: 4, initiative: 3 },
+        overallScore: '4/5',
+        overallStatus: 'Good',
+      },
+      {
+        id: '3',
+        name: 'Jesse Pinkman',
+        avatar: 'https://i.pravatar.cc/100?img=11',
+        contributionSubtext: 'Rate the contribution of Jesse',
+        ratingLabel: 'Fair',
+        ratingColor: '#EAB308',
+        scores: { contribution: 3, quality: 3, communication: 3, teamwork: 2, initiative: 3 },
+        overallScore: '3/5',
+        overallStatus: 'Fair',
+      },
+      {
+        id: '4',
+        name: 'Sheldon Lee Cooper',
+        avatar: 'https://i.pravatar.cc/100?img=60',
+        contributionSubtext: 'Rate yourself',
+        ratingLabel: 'Excellent',
+        ratingColor: '#10B981',
+        scores: { contribution: 5, quality: 5, communication: 5, teamwork: 5, initiative: 5 },
+        overallScore: '5/5',
+        overallStatus: 'Excellent',
+      },
+      {
+        id: '5',
+        name: 'Ronald Dela Rosa',
+        avatar: 'https://i.pravatar.cc/100?img=9',
+        contributionSubtext: 'Rate the contribution of Bato',
+        ratingLabel: 'No Work',
+        ratingColor: '#64748B',
+        scores: { contribution: 0, quality: 0, communication: 0, teamwork: 0, initiative: 0 },
+        overallScore: '0/5',
+        overallStatus: 'No Work',
+      },
+    ],
+  },
+  {
+    id: '2',
+    title: 'Pied Piper AI Group',
+    chapter: 'Chapter 2: Literature Review',
+    assessments: [
+      {
+        id: '6',
+        name: 'Richard Hendricks',
+        avatar: 'https://i.pravatar.cc/100?img=13',
+        contributionSubtext: 'Rate the contribution of Richard',
+        ratingLabel: 'Excellent',
+        ratingColor: '#10B981',
+        scores: { contribution: 5, quality: 5, communication: 5, teamwork: 5, initiative: 5 },
+        overallScore: '5/5',
+        overallStatus: 'Excellent',
+      },
+    ],
+  },
+  {
+    id: '3',
+    title: 'BioTech Health Research',
+    chapter: 'Chapter 4: Data Results',
+    assessments: [],
+  },
+  {
+    id: '4',
+    title: 'EcoTech Innovations',
+    chapter: 'Chapter 1: Proposal',
+    assessments: [],
+  },
+];
+
+export default function EducatorStudentAssessmentScreen({
   onBack,
   setEducatorDashView,
-}: EducatorTaskManagementScreenProps) {
-  // Dynamic Current Date Setup
-  const today = new Date();
-  const [currentDate, setCurrentDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  );
-  const [selectedDate, setSelectedDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  );
-
-  // Active Bottom Tab
+}: EducatorStudentAssessmentScreenProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'chat' | 'profile'>('dashboard');
 
-  // Sample Events List
-  const [eventsList, setEventsList] = useState<CalendarEvent[]>([
-    {
-      id: '1',
-      title: 'Adviser Consultation',
-      time: '10:00 AM - 11:00 AM',
-      dateStr: formatDateToYYYYMMDD(today),
-      scheduledBy: 'Scheduled by you',
-      hasMeet: true,
-      meetLink: 'https://meet.google.com/abc-defg-hij',
-      dotColor: '#2563EB',
-    },
-    {
-      id: '2',
-      title: 'Title Defense Review',
-      time: '02:00 PM - 03:30 PM',
-      dateStr: formatDateToYYYYMMDD(
-        new Date(today.getFullYear(), today.getMonth(), today.getDate() + 6)
-      ),
-      scheduledBy: 'Scheduled by Panel',
-      hasMeet: true,
-      meetLink: 'https://meet.google.com/xyz-uvwx-rst',
-      dotColor: '#2563EB',
-    },
-  ]);
+  const [showGroupSelectModal, setShowGroupSelectModal] = useState<boolean>(true);
+  const [selectedGroup, setSelectedGroup] = useState<ThesisGroupAssessment | null>(null);
 
-  // Modal States
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [sortOption, setSortOption] = useState<string>('Lowest');
+  const [showSortModal, setShowSortModal] = useState<boolean>(false);
+  const [selectedStudentForDetail, setSelectedStudentForDetail] = useState<StudentPeerAssessment | null>(null);
 
-  // Form Inputs
-  const [eventTitle, setEventTitle] = useState('');
-  const [eventTime, setEventTime] = useState('');
-  const [eventScheduledBy, setEventScheduledBy] = useState('Scheduled by you');
-  const [includeMeet, setIncludeMeet] = useState(true);
-
-  // Helper: Format Date to YYYY-MM-DD
-  function formatDateToYYYYMMDD(d: Date): string {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  // Helper: Format Date for Display (e.g., May 19, 2026)
-  const formatDisplayDate = (d: Date): string => {
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    });
+  const handleSelectGroup = (group: ThesisGroupAssessment) => {
+    setSelectedGroup(group);
+    setShowGroupSelectModal(false);
   };
 
-  // Calendar Calculation Helpers
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
-
-  const isToday = (dayNum: number) => {
-    return (
-      dayNum === today.getDate() &&
-      month === today.getMonth() &&
-      year === today.getFullYear()
-    );
-  };
-
-  const isSelected = (dayNum: number) => {
-    return (
-      dayNum === selectedDate.getDate() &&
-      month === selectedDate.getMonth() &&
-      year === selectedDate.getFullYear()
-    );
-  };
-
-  const hasEventOnDay = (dayNum: number) => {
-    const targetDateStr = formatDateToYYYYMMDD(new Date(year, month, dayNum));
-    return eventsList.some((e) => e.dateStr === targetDateStr);
-  };
-
-  // Add Event Handler
-  const handleAddEvent = () => {
-    if (!eventTitle.trim()) {
-      Alert.alert('Required', 'Please enter event/reminder title.');
-      return;
+  const handleSelectSort = (option: 'LOWEST SCORE' | 'HIGHEST SCORE' | 'RELEVANCE') => {
+    if (!selectedGroup) return;
+    let sortedList = [...selectedGroup.assessments];
+    if (option === 'LOWEST SCORE') {
+      setSortOption('Lowest');
+      sortedList.sort((a, b) => a.scores.contribution - b.scores.contribution);
+    } else if (option === 'HIGHEST SCORE') {
+      setSortOption('Highest');
+      sortedList.sort((a, b) => b.scores.contribution - a.scores.contribution);
+    } else {
+      setSortOption('Relevance');
     }
-
-    const newEvent: CalendarEvent = {
-      id: Date.now().toString(),
-      title: eventTitle.trim(),
-      time: eventTime.trim() || '09:00 AM - 10:00 AM',
-      dateStr: formatDateToYYYYMMDD(selectedDate),
-      scheduledBy: eventScheduledBy.trim() || 'Scheduled by you',
-      hasMeet: includeMeet,
-      meetLink: includeMeet ? 'https://meet.google.com/new-meet-link' : undefined,
-      dotColor: '#2563EB',
-    };
-
-    setEventsList([...eventsList, newEvent]);
-    setEventTitle('');
-    setEventTime('');
-    setShowAddModal(false);
-    Alert.alert('Success', 'New event reminder created successfully.');
+    setSelectedGroup({ ...selectedGroup, assessments: sortedList });
+    setShowSortModal(false);
   };
 
-  // Save Edit Handler
-  const handleSaveEdit = () => {
-    if (!selectedEvent || !eventTitle.trim()) return;
-
-    setEventsList(
-      eventsList.map((evt) =>
-        evt.id === selectedEvent.id
-          ? {
-              ...evt,
-              title: eventTitle.trim(),
-              time: eventTime.trim() || evt.time,
-              scheduledBy: eventScheduledBy.trim() || evt.scheduledBy,
-              hasMeet: includeMeet,
-            }
-          : evt
-      )
-    );
-
-    setSelectedEvent(null);
-    setShowEditModal(false);
-    Alert.alert('Updated', 'Event details saved successfully.');
+  const renderStarRating = (ratingCount: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Ionicons
+          key={i}
+          name={i <= ratingCount ? 'star' : 'star-outline'}
+          size={24}
+          color="#2563EB"
+          style={{ marginRight: 6 }}
+        />
+      );
+    }
+    return <View style={{ flexDirection: 'row', marginTop: 4 }}>{stars}</View>;
   };
 
-  // Delete Event Handler
-  const handleDeleteEvent = (id: string) => {
-    Alert.alert('Delete Event', 'Are you sure you want to delete this event?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          setEventsList(eventsList.filter((e) => e.id !== id));
-          setShowEditModal(false);
-          setSelectedEvent(null);
-        },
-      },
-    ]);
-  };
-
-  const openGoogleMeet = (link?: string) => {
-    if (!link) return;
-    Linking.openURL(link).catch(() =>
-      Alert.alert('Error', 'Could not open Google Meet link.')
-    );
-  };
-
-  // Filter Events for the Currently Selected Date
-  const selectedDateStr = formatDateToYYYYMMDD(selectedDate);
-  const eventsForSelectedDate = eventsList.filter((e) => e.dateStr === selectedDateStr);
-  const isSelectedDateToday = selectedDateStr === formatDateToYYYYMMDD(today);
-
-  return (
-    <View style={styles.container}>
-      {/* TOP HEADER BAR */}
-      <View style={styles.topHeaderBar}>
-        <Text style={styles.headerTitle}>Calendar</Text>
-        <View style={styles.headerRightRow}>
-          <TouchableOpacity style={styles.headerIconTouch}>
-            <Ionicons name="search-outline" size={22} color="#FFFFFF" />
+  // 4th Photo View: DETAILED STUDENT ASSESSMENT VIEW
+  if (selectedStudentForDetail) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.detailHeaderBar}>
+          <TouchableOpacity onPress={() => setSelectedStudentForDetail(null)}>
+            <Text style={styles.detailCancelBtnText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIconTouch}>
-            <Ionicons name="funnel-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.detailHeaderTitle}>
+            Assess: {selectedStudentForDetail.name}
+          </Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <View style={styles.whiteCardContainer}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
+            <Text style={styles.detailSubtitleText}>
+              Rate your groupmate based on the criteria below.
+            </Text>
+
+            <View style={styles.criteriaBlock}>
+              <Text style={styles.criteriaTitle}>Contribution to Tasks</Text>
+              <Text style={styles.criteriaSub}>How well they completed assigned tasks.</Text>
+              {renderStarRating(selectedStudentForDetail.scores.contribution)}
+            </View>
+
+            <View style={styles.criteriaBlock}>
+              <Text style={styles.criteriaTitle}>Quality of Work</Text>
+              <Text style={styles.criteriaSub}>The quality and accuracy of their work.</Text>
+              {renderStarRating(selectedStudentForDetail.scores.quality)}
+            </View>
+
+            <View style={styles.criteriaBlock}>
+              <Text style={styles.criteriaTitle}>Communication</Text>
+              <Text style={styles.criteriaSub}>How effectively they communicated.</Text>
+              {renderStarRating(selectedStudentForDetail.scores.communication)}
+            </View>
+
+            <View style={styles.criteriaBlock}>
+              <Text style={styles.criteriaTitle}>Teamwork</Text>
+              <Text style={styles.criteriaSub}>How well they collaborated with the group.</Text>
+              {renderStarRating(selectedStudentForDetail.scores.teamwork)}
+            </View>
+
+            <View style={styles.criteriaBlock}>
+              <Text style={styles.criteriaTitle}>Initiative</Text>
+              <Text style={styles.criteriaSub}>Their willingness to take initiative and help.</Text>
+              {renderStarRating(selectedStudentForDetail.scores.initiative)}
+            </View>
+
+            <View style={styles.overallRatingContainer}>
+              <Text style={styles.overallRatingLabel}>Overall Rating</Text>
+              <View style={styles.overallScoreBox}>
+                <Text style={styles.overallScoreVal}>{selectedStudentForDetail.overallScore}</Text>
+                <Text style={styles.overallStatusVal}>{selectedStudentForDetail.overallStatus}</Text>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+
+        <View style={styles.bottomTabContainer}>
+          <TouchableOpacity
+            style={styles.tabButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              setSelectedStudentForDetail(null);
+              onBack();
+            }}
+          >
+            <Ionicons name="home" size={24} color="#1E58A8" />
+            <Text style={[styles.tabLabelText, styles.activeTabLabel]}>Dashboard</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              if (setEducatorDashView) setEducatorDashView('chat');
+            }}
+          >
+            <Ionicons name="chatbox-ellipses-outline" size={24} color="#64748B" />
+            <Text style={styles.tabLabelText}>Chat</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              if (setEducatorDashView) setEducatorDashView('profile');
+            }}
+          >
+            <Ionicons name="person-outline" size={24} color="#64748B" />
+            <Text style={styles.tabLabelText}>Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
+    );
+  }
 
-      {/* MAIN WHITE CARD CONTAINER */}
-      <View style={styles.whiteCardContainerGroup}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 90 }}
-        >
-          {/* CALENDAR MONTH HEADER */}
-          <View style={styles.calendarHeaderRow}>
-            <TouchableOpacity onPress={handlePrevMonth} style={styles.monthNavBtn}>
-              <Ionicons name="chevron-back" size={18} color="#94A3B8" />
-            </TouchableOpacity>
-            <Text style={styles.monthTitleText}>
-              {currentDate.toLocaleDateString('en-US', {
-                month: 'long',
-                year: 'numeric',
-              })}
-            </Text>
-            <TouchableOpacity onPress={handleNextMonth} style={styles.monthNavBtn}>
-              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
-            </TouchableOpacity>
-          </View>
+  // 2nd Photo View: GRADED PEERS ASSESSMENT VIEW (NO SETTINGS ICON AT UPPER RIGHT)
+  return (
+    <View style={styles.container}>
+      <View style={styles.topHeaderBar}>
+        <TouchableOpacity style={styles.headerIconTouch} onPress={() => setShowGroupSelectModal(true)}>
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Peers Assessment</Text>
+        {/* SETTINGS ICON REMOVED AS REQUESTED */}
+        <View style={{ width: 28 }} />
+      </View>
 
-          {/* DAYS OF WEEK ROW */}
-          <View style={styles.daysOfWeekRow}>
-            {['SAN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day, idx) => (
-              <Text key={idx} style={styles.dayOfWeekText}>
-                {day}
-              </Text>
-            ))}
-          </View>
+      <View style={styles.whiteCardContainer}>
+        <View style={styles.sortHeaderRow}>
+          <Text style={styles.overallRatingsTitle}>Overall Ratings by Average</Text>
+          <TouchableOpacity style={styles.sortDropdownBtn} onPress={() => setShowSortModal(true)}>
+            <Text style={styles.sortDropdownText}>Sort: {sortOption}</Text>
+            <Ionicons name="chevron-down" size={16} color="#0F172A" style={{ marginLeft: 4 }} />
+          </TouchableOpacity>
+        </View>
 
-          {/* CALENDAR GRID */}
-          <View style={styles.calendarGridContainer}>
-            {/* Empty slots for start offset */}
-            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-              <View key={`empty-${i}`} style={styles.calendarCell} />
-            ))}
-
-            {/* Days of Month */}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const dayNum = i + 1;
-              const selected = isSelected(dayNum);
-              const todayFlag = isToday(dayNum);
-              const hasEvents = hasEventOnDay(dayNum);
-
-              return (
-                <TouchableOpacity
-                  key={`day-${dayNum}`}
-                  style={styles.calendarCell}
-                  activeOpacity={0.7}
-                  onPress={() => setSelectedDate(new Date(year, month, dayNum))}
-                >
-                  <View
-                    style={[
-                      styles.dayNumberCircle,
-                      selected && styles.selectedDayCircle,
-                      !selected && todayFlag && styles.todayDayCircle,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.dayNumberText,
-                        (selected || todayFlag) && styles.selectedDayNumberText,
-                      ]}
-                    >
-                      {dayNum}
-                    </Text>
-                  </View>
-                  {hasEvents && <View style={styles.eventDot} />}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <View style={styles.dividerLine} />
-
-          {/* EVENTS SECTION */}
-          <View style={styles.eventsSectionHeaderRow}>
-            <Text style={styles.eventsTitleText}>Events</Text>
-            {/* + SIGN BUTTON BELOW CALENDAR TO ADD REMINDER */}
-            <TouchableOpacity
-              style={styles.addEventPlusBtn}
-              activeOpacity={0.8}
-              onPress={() => setShowAddModal(true)}
-            >
-              <Ionicons name="add" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-
-          {/* SELECTED DATE DISPLAY */}
-          <View style={styles.dateBannerRow}>
-            <Text style={styles.dateBannerTitle}>{formatDisplayDate(selectedDate)}</Text>
-            {isSelectedDateToday && <Text style={styles.todayLabelText}>Today</Text>}
-          </View>
-
-          {/* EVENTS LIST FOR SELECTED DATE */}
-          {eventsForSelectedDate.length === 0 ? (
-            <View style={styles.noEventsContainer}>
-              <Text style={styles.noEventsText}>
-                No scheduled meetings or reminders for this date.
-              </Text>
-            </View>
-          ) : (
-            eventsForSelectedDate.map((item) => (
-              <View key={item.id} style={styles.eventCardItem}>
-                {/* Dot Indicator */}
-                <View style={styles.eventDotBlue} />
-
-                {/* Details */}
-                <View style={styles.eventInfoCol}>
-                  <Text style={styles.eventCardTitle}>{item.title}</Text>
-                  <Text style={styles.eventCardTime}>{item.time}</Text>
-                  <Text style={styles.eventCardSub}>{item.scheduledBy}</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 90 }}>
+          {selectedGroup && selectedGroup.assessments.length > 0 ? (
+            selectedGroup.assessments.map((student) => (
+              <TouchableOpacity
+                key={student.id}
+                style={styles.studentAssessmentRow}
+                activeOpacity={0.8}
+                onPress={() => setSelectedStudentForDetail(student)}
+              >
+                <View style={styles.studentAvatarBox}>
+                  <Ionicons name="person-circle" size={48} color="#475569" />
                 </View>
 
-                {/* Meet Icon & Edit Action */}
-                <View style={styles.eventActionsCol}>
-                  {item.hasMeet && (
-                    <TouchableOpacity onPress={() => openGoogleMeet(item.meetLink)}>
-                      <Ionicons
-                        name="videocam"
-                        size={22}
-                        color="#22C55E"
-                        style={{ marginBottom: 8 }}
-                      />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedEvent(item);
-                      setEventTitle(item.title);
-                      setEventTime(item.time);
-                      setEventScheduledBy(item.scheduledBy);
-                      setIncludeMeet(!!item.hasMeet);
-                      setShowEditModal(true);
-                    }}
-                  >
-                    <Ionicons name="pencil-outline" size={20} color="#1E58A8" />
-                  </TouchableOpacity>
+                <View style={styles.studentInfoCol}>
+                  <Text style={styles.studentNameText}>{student.name}</Text>
+                  <Text style={styles.studentSubtext}>{student.contributionSubtext}</Text>
                 </View>
-              </View>
+
+                <View style={[styles.ratingPillBadge, { borderColor: student.ratingColor }]}>
+                  <Text style={[styles.ratingPillText, { color: student.ratingColor }]}>
+                    {student.ratingLabel}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             ))
+          ) : (
+            <View style={{ alignItems: 'center', marginTop: 40 }}>
+              <Text style={{ color: '#64748B' }}>No peer assessments found for this group.</Text>
+            </View>
           )}
         </ScrollView>
       </View>
 
-      {/* LOWER NAVIGATOR */}
       <View style={styles.bottomTabContainer}>
         <TouchableOpacity
           style={styles.tabButton}
           activeOpacity={0.7}
-          onPress={onBack}
+          onPress={() => {
+            setActiveTab('dashboard');
+            onBack();
+          }}
         >
-          <Ionicons name="home" size={24} color="#1E58A8" />
-          <Text style={[styles.tabLabelText, styles.activeTabLabel]}>Dashboard</Text>
+          <Ionicons
+            name={activeTab === 'dashboard' ? 'home' : 'home-outline'}
+            size={24}
+            color={activeTab === 'dashboard' ? '#1E58A8' : '#64748B'}
+          />
+          <Text style={[styles.tabLabelText, activeTab === 'dashboard' && styles.activeTabLabel]}>
+            Dashboard
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabButton}
           activeOpacity={0.7}
           onPress={() => {
+            setActiveTab('chat');
             if (setEducatorDashView) setEducatorDashView('chat');
           }}
         >
-          <Ionicons name="chatbox-ellipses-outline" size={24} color="#64748B" />
-          <Text style={styles.tabLabelText}>Chat</Text>
+          <Ionicons
+            name={activeTab === 'chat' ? 'chatbox-ellipses' : 'chatbox-ellipses-outline'}
+            size={24}
+            color={activeTab === 'chat' ? '#1E58A8' : '#64748B'}
+          />
+          <Text style={[styles.tabLabelText, activeTab === 'chat' && styles.activeTabLabel]}>
+            Chat
+          </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabButton}
           activeOpacity={0.7}
           onPress={() => {
+            setActiveTab('profile');
             if (setEducatorDashView) setEducatorDashView('profile');
           }}
         >
-          <Ionicons name="person-outline" size={24} color="#64748B" />
-          <Text style={styles.tabLabelText}>Profile</Text>
+          <Ionicons
+            name={activeTab === 'profile' ? 'person' : 'person-outline'}
+            size={24}
+            color={activeTab === 'profile' ? '#1E58A8' : '#64748B'}
+          />
+          <Text style={[styles.tabLabelText, activeTab === 'profile' && styles.activeTabLabel]}>
+            Profile
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* ADD NEW EVENT / REMINDER MODAL */}
-      <Modal visible={showAddModal} transparent animationType="slide">
+      {/* 1st Photo View: GROUP SELECTION MODAL */}
+      <Modal visible={showGroupSelectModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
-            <Text style={styles.modalHeaderTitle}>Set New Event / Reminder</Text>
-            <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 12 }}>
-              Date: <Text style={{ fontWeight: 'bold' }}>{formatDisplayDate(selectedDate)}</Text>
-            </Text>
+            <Text style={styles.sortModalTitle}>Select Thesis Group</Text>
 
-            <Text style={styles.inputLabel}>Event Title / Reminder</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              placeholder="e.g. Adviser Consultation / Chapter Draft Review"
-              placeholderTextColor="#94A3B8"
-              value={eventTitle}
-              onChangeText={setEventTitle}
-            />
+            <ScrollView style={{ maxHeight: 280, marginVertical: 12 }}>
+              {SAMPLE_GROUPS_ASSESSMENTS.map((group) => {
+                const isSelected = selectedGroup?.id === group.id;
+                return (
+                  <TouchableOpacity
+                    key={group.id}
+                    style={[styles.groupSelectItem, isSelected && styles.groupSelectActive]}
+                    onPress={() => handleSelectGroup(group)}
+                  >
+                    <Text style={styles.groupSelectTitle}>{group.title}</Text>
+                    <Text style={styles.groupSelectSub}>{group.chapter}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
-            <Text style={[styles.inputLabel, { marginTop: 12 }]}>Time Schedule</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              placeholder="e.g. 10:00 AM - 11:00 AM"
-              placeholderTextColor="#94A3B8"
-              value={eventTime}
-              onChangeText={setEventTime}
-            />
-
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              activeOpacity={0.8}
-              onPress={() => setIncludeMeet(!includeMeet)}
-            >
-              <Ionicons
-                name={includeMeet ? 'checkbox' : 'square-outline'}
-                size={22}
-                color="#1E58A8"
-              />
-              <Text style={styles.checkboxText}>
-                Generate Google Meet consultation link
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.primaryBlueBtn} onPress={handleAddEvent}>
-              <Text style={styles.primaryBlueBtnText}>Save Event</Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={styles.cancelOutlineBtn}
-              onPress={() => setShowAddModal(false)}
+              onPress={() => {
+                setShowGroupSelectModal(false);
+                onBack();
+              }}
             >
-              <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
+              <Text style={styles.cancelOutlineBtnText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* EDIT EVENT MODAL */}
-      <Modal visible={showEditModal} transparent animationType="fade">
-        <View style={styles.modalOverlayDark}>
+      {/* 3rd Photo View: SORT OPTIONS MODAL */}
+      <Modal visible={showSortModal} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlayDark}
+          activeOpacity={1}
+          onPress={() => setShowSortModal(false)}
+        >
           <View style={styles.modalWhiteCard}>
-            <Text style={styles.modalHeaderTitle}>Edit Event / Reminder</Text>
+            <Text style={styles.sortModalTitle}>Sort Options</Text>
+            <Text style={styles.sortModalSub}>Select sorting criteria:</Text>
 
-            <Text style={styles.inputLabel}>Event Title</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              value={eventTitle}
-              onChangeText={setEventTitle}
-            />
-
-            <Text style={[styles.inputLabel, { marginTop: 12 }]}>Time</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              value={eventTime}
-              onChangeText={setEventTime}
-            />
-
-            <TouchableOpacity style={styles.primaryBlueBtn} onPress={handleSaveEdit}>
-              <Text style={styles.primaryBlueBtnText}>Save Changes</Text>
+            <TouchableOpacity style={styles.sortOptionBtn} onPress={() => handleSelectSort('LOWEST SCORE')}>
+              <Text style={styles.sortOptionText}>LOWEST SCORE</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.dangerOutlineBtn}
-              onPress={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}
-            >
-              <Text style={styles.dangerOutlineBtnText}>Delete Event</Text>
+            <TouchableOpacity style={styles.sortOptionBtn} onPress={() => handleSelectSort('HIGHEST SCORE')}>
+              <Text style={styles.sortOptionText}>HIGHEST SCORE</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.cancelOutlineBtn}
-              onPress={() => setShowEditModal(false)}
-            >
-              <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
+            <TouchableOpacity style={styles.sortOptionBtn} onPress={() => handleSelectSort('RELEVANCE')}>
+              <Text style={styles.sortOptionText}>RELEVANCE</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -516,19 +472,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FFFFFF',
-  },
-  headerRightRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
   },
   headerIconTouch: {
     padding: 4,
   },
-  whiteCardContainerGroup: {
+  whiteCardContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 28,
@@ -536,170 +487,88 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
   },
-  calendarHeaderRow: {
+  sortHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  monthNavBtn: {
-    padding: 6,
-  },
-  monthTitleText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    color: '#334155',
-  },
-  daysOfWeekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  dayOfWeekText: {
-    width: 40,
-    textAlign: 'center',
-    fontSize: 11,
-    fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    color: '#94A3B8',
-  },
-  calendarGridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  calendarCell: {
-    width: '14.28%',
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 2,
-  },
-  dayNumberCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedDayCircle: {
-    backgroundColor: '#EA580C', // Orange circle badge for selected day matching screenshot
-  },
-  todayDayCircle: {
-    backgroundColor: '#EA580C',
-  },
-  dayNumberText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  selectedDayNumberText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  eventDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#2563EB',
-    marginTop: 2,
-  },
-  dividerLine: {
-    height: 1,
-    backgroundColor: '#E2E8F0',
     marginVertical: 14,
   },
-  eventsSectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  eventsTitleText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    color: '#000000',
-  },
-  addEventPlusBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 8,
-    backgroundColor: '#007AFF', // Blue + sign button matching screenshot
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dateBannerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  dateBannerTitle: {
+  overallRatingsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     color: '#000000',
   },
-  todayLabelText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    color: '#1E58A8',
-  },
-  noEventsContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  noEventsText: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontStyle: 'italic',
-  },
-  eventCardItem: {
+  sortDropdownBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     backgroundColor: '#FFFFFF',
   },
-  eventDotBlue: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#2563EB',
-    marginRight: 12,
+  sortDropdownText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
   },
-  eventInfoCol: {
+  studentAssessmentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  studentAvatarBox: {
+    marginRight: 10,
+  },
+  studentInfoCol: {
     flex: 1,
   },
-  eventCardTitle: {
-    fontSize: 14,
+  studentNameText: {
+    fontSize: 15,
     fontWeight: 'bold',
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     color: '#000000',
   },
-  eventCardTime: {
-    fontSize: 11,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  studentSubtext: {
+    fontSize: 12,
     color: '#64748B',
     marginTop: 2,
   },
-  eventCardSub: {
-    fontSize: 11,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    color: '#94A3B8',
-    marginTop: 2,
-  },
-  eventActionsCol: {
+  ratingPillBadge: {
+    borderWidth: 1.5,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    minWidth: 90,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: 8,
+  },
+  ratingPillText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  groupSelectItem: {
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  groupSelectActive: {
+    borderColor: '#1E58A8',
+    backgroundColor: '#EFF6FF',
+  },
+  groupSelectTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  groupSelectSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
   },
   bottomTabContainer: {
     flexDirection: 'row',
@@ -712,10 +581,6 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 12 : 4,
     paddingTop: 6,
     elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
   },
   tabButton: {
     flex: 1,
@@ -743,70 +608,34 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 20,
+    padding: 24,
     elevation: 8,
   },
-  modalHeaderTitle: {
+  sortModalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#0F172A',
-    marginBottom: 10,
   },
-  inputLabel: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#475569',
-    marginBottom: 6,
-  },
-  textInputStyle: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#000000',
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 14,
-  },
-  checkboxText: {
+  sortModalSub: {
     fontSize: 13,
-    color: '#334155',
-    marginLeft: 8,
+    color: '#64748B',
+    marginTop: 4,
+    marginBottom: 16,
   },
-  primaryBlueBtn: {
-    backgroundColor: '#1E58A8',
-    borderRadius: 10,
+  sortOptionBtn: {
+    alignItems: 'flex-end',
     paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 18,
   },
-  primaryBlueBtnText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+  sortOptionText: {
     fontSize: 14,
-  },
-  dangerOutlineBtn: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#EF4444',
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  dangerOutlineBtnText: {
-    color: '#EF4444',
     fontWeight: 'bold',
-    fontSize: 13,
+    color: '#1E58A8',
+    letterSpacing: 0.5,
   },
   cancelOutlineBtn: {
-    marginTop: 10,
+    marginTop: 14,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#CBD5E1',
     alignItems: 'center',
@@ -815,5 +644,78 @@ const styles = StyleSheet.create({
     color: '#475569',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  detailHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 40 : 52,
+    paddingBottom: 16,
+  },
+  detailCancelBtnText: {
+    fontSize: 15,
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  detailHeaderTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  detailSubtitleText: {
+    fontSize: 13,
+    color: '#475569',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  criteriaBlock: {
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    paddingBottom: 14,
+  },
+  criteriaTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  criteriaSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  overallRatingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    paddingTop: 10,
+  },
+  overallRatingLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  overallScoreBox: {
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignItems: 'center',
+    minWidth: 120,
+  },
+  overallScoreVal: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#EAB308',
+  },
+  overallStatusVal: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#EAB308',
+    marginTop: 2,
   },
 });

@@ -1,44 +1,42 @@
+import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
   Alert,
+  Modal,
   Platform,
+  ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons, Octicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as DocumentPicker from 'expo-document-picker';
-
-import ThesisWorkspaceScreen from './ThesisWorkspaceScreen';
-import TasksScreen from './TasksScreen';
-import AdviserFeedbackScreen from './AdviserFeedbackScreen';
-import FileRepositoryScreen from './FileRepositoryScreen';
-import ReferenceScreen from './ReferenceScreen';
-import GoogleScholarScreen from './GoogleScholarScreen';
-import MeetingsScreen from './MeetingsScreen';
-import ThesisGroupChatScreen from './ThesisGroupChatScreen';
-import AIAssistantScreen from './AIAssistantScreen';
-import PeerAssessmentScreen from './PeerAssessmentScreen';
-import DefensePreparationScreen from './DefensePreparationScreen';
-import SettingsScreen from './SettingsScreen';
-import HelpSupportScreen from './HelpSupportScreen';
-import ProfileScreen from './ProfileScreen';
-
 import {
-  ThesisProject,
-  ChapterItem,
-  NoteItem,
-  TaskItem,
-  FeedbackItem,
-  ReferenceItem,
-  NotificationItem,
   ActivityLogItem,
+  ChapterItem,
+  FeedbackItem,
+  NoteItem,
+  NotificationItem,
+  ReferenceItem,
+  TaskItem,
+  ThesisProject,
 } from '../types';
+import AdviserFeedbackScreen from './AdviserFeedbackScreen';
+import AIAssistantScreen from './AIAssistantScreen';
+import DefensePreparationScreen from './DefensePreparationScreen';
+import FileRepositoryScreen from './FileRepositoryScreen';
+import GoogleScholarScreen from './GoogleScholarScreen';
+import HelpSupportScreen from './HelpSupportScreen';
+import MeetingsScreen from './MeetingsScreen';
+import PeerAssessmentScreen from './PeerAssessmentScreen';
+import ProfileScreen from './ProfileScreen';
+import ReferenceScreen from './ReferenceScreen';
+import SettingsScreen from './SettingsScreen';
+import TasksScreen from './TasksScreen';
+import ThesisGroupChatScreen from './ThesisGroupChatScreen';
+import ThesisWorkspaceScreen from './ThesisWorkspaceScreen';
 
 interface StudentDashboardProps {
   studentDashView: any;
@@ -81,40 +79,33 @@ export default function StudentDashboardScreen({
   userName = 'User',
   userEmail = 'user@gmail.com',
 }: StudentDashboardProps) {
-  // Drawer Menu & Modals State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [selectedInspectChapter, setSelectedInspectChapter] = useState<ChapterItem | null>(null);
   const [showFileInspectModal, setShowFileInspectModal] = useState(false);
 
-  // Reference Screen Controls State
   const [refSearchActive, setRefSearchActive] = useState(false);
   const [refAddModalActive, setRefAddModalActive] = useState(false);
 
-  // Thesis Workspace States
   const [showProjectSelectModal, setShowProjectSelectModal] = useState(false);
   const [workspaceTab, setWorkspaceTab] = useState<'Overview' | 'Chapters' | 'Notes' | 'Activity'>('Overview');
   const [showAddChapterModal, setShowAddChapterModal] = useState(false);
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [newChapterFile, setNewChapterFile] = useState<string | null>(null);
 
-  // Note Search & Edit States
   const [searchNoteQuery, setSearchNoteQuery] = useState('');
   const [editingNote, setEditingNote] = useState<NoteItem | null>(null);
   const [noteTitleInput, setNoteTitleInput] = useState('');
   const [noteContentInput, setNoteContentInput] = useState('');
   const [showNoteModal, setShowNoteModal] = useState(false);
 
-  // File Repository Search State
   const [searchFileQuery, setSearchFileQuery] = useState('');
 
-  // Adviser Feedback States
   const [feedbackSubTab, setFeedbackSubTab] = useState<'Feedback' | 'Calendar'>('Feedback');
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [replyingFeedback, setReplyingFeedback] = useState<any>(null);
   const [replyTextInput, setReplyTextInput] = useState('');
 
-  // Adviser Feedbacks List State
   const [adviserFeedbacks, setAdviserFeedbacks] = useState([
     {
       id: 'fb1',
@@ -136,26 +127,24 @@ export default function StudentDashboardScreen({
     },
   ]);
 
-  // Notification Filter State
   const [notificationTab, setNotificationTab] = useState<'all' | 'unread'>('all');
 
-  // Dynamic calculation for overall progress
   const completedChapters = chaptersList.filter((c) => c.progress === 100).length;
   const overallProgress = Math.round(
     chaptersList.reduce((acc, c) => acc + c.progress, 0) / (chaptersList.length || 1)
   );
+
   const dueSoonTasksCount = tasksList.filter((t) => !t.completed).length;
   const overdueTasksCount = 2;
 
-  // HELPER FUNCTION: EXTRACT SURNAME FROM FULL NAME
   const getSurname = (name: string) => {
     if (!name || name.trim() === '') return 'User';
     const parts = name.trim().split(' ');
     return parts[parts.length - 1];
   };
+
   const studentSurname = getSurname(userName);
 
-  // HELPER FUNCTION: PICK FILE FROM PHONE STORAGE
   const handlePickDocumentFromPhone = async (onSuccess: (fileName: string) => void) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -175,7 +164,7 @@ export default function StudentDashboardScreen({
         Alert.alert('File Selected', `Pumili ka ng file: ${pickedFileName}`);
       }
     } catch (error: any) {
-      Alert.alert('Error', 'Hindi mabuksan ang phone storage: ' + error.message);
+      Alert.alert('Error', `Hindi mabuksan ang phone storage: ${error.message}`);
     }
   };
 
@@ -189,8 +178,8 @@ export default function StudentDashboardScreen({
 
   const repoFiles = [
     { id: 'rf1', title: 'Thesis Proposal.pdf', date: 'May 05, 2026', size: '2.4 MB', type: 'pdf' },
-    { id: 'rf2', title: 'Data Collection.xlsx', date: 'May 12, 2026', size: '11.1 MB', type: 'xlsx' },
-    { id: 'rf3', title: 'Research Instrument.docx', date: 'Apr 26, 2026', size: '1856 KB', type: 'docx' },
+    { id: 'rf2', title: 'Data Collection.xlsx', date: 'May 12, 2026', size: '1.1 MB', type: 'xlsx' },
+    { id: 'rf3', title: 'Research Instrument.docx', date: 'Apr 26, 2026', size: '856 KB', type: 'docx' },
   ];
 
   const filteredFolders = repoFolders.filter((f) =>
@@ -217,6 +206,7 @@ export default function StudentDashboardScreen({
       Alert.alert('Required', 'Please enter a title for the chapter.');
       return;
     }
+
     const nextChapterNumber = chaptersList.length + 1;
     const newChapterObj: ChapterItem = {
       id: `ch-${Date.now()}`,
@@ -227,17 +217,14 @@ export default function StudentDashboardScreen({
       submittedAt: newChapterFile ? 'Just Now' : undefined,
       status: newChapterFile ? 'In Progress' : 'Draft',
     };
+
     setChaptersList((prev) => [...prev, newChapterObj]);
     setNewChapterTitle('');
     setNewChapterFile(null);
     setShowAddChapterModal(false);
-    Alert.alert(
-      'Chapter Added',
-      `Chapter ${nextChapterNumber}: ${newChapterTitle} has been created.`
-    );
+    Alert.alert('Chapter Added', `Chapter ${nextChapterNumber}: ${newChapterTitle} has been created.`);
   };
 
-  // RE-SUBMIT / UPLOAD FILE MULA SA STORAGE NG PHONE
   const handleReSubmitFile = (chapterId: string) => {
     handlePickDocumentFromPhone((pickedFileName) => {
       setChaptersList((prev) =>
@@ -328,6 +315,7 @@ export default function StudentDashboardScreen({
       Alert.alert('Required', 'Please enter a note title.');
       return;
     }
+
     if (editingNote) {
       setNotesList((prev) =>
         prev.map((n) =>
@@ -348,6 +336,7 @@ export default function StudentDashboardScreen({
       setNotesList((prev) => [newNoteObj, ...prev]);
       Alert.alert('Success', 'New note created.');
     }
+
     setShowNoteModal(false);
     setEditingNote(null);
     setNoteTitleInput('');
@@ -356,6 +345,7 @@ export default function StudentDashboardScreen({
 
   const handleDeleteNoteSubmit = () => {
     if (!editingNote) return;
+
     Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -378,6 +368,7 @@ export default function StudentDashboardScreen({
       Alert.alert('Required', 'Please enter a response.');
       return;
     }
+
     if (replyingFeedback) {
       setAdviserFeedbacks((prev) =>
         prev.map((fb) =>
@@ -398,7 +389,7 @@ export default function StudentDashboardScreen({
   };
 
   const roadmapMilestones = [
-    { id: 'm1', title: 'Proposal', date: 'Jan 16, 2026', isDone: true },
+    { id: 'ml', title: 'Proposal', date: 'Jan 16, 2026', isDone: true },
     ...chaptersList.map((ch) => ({
       id: ch.id,
       title: `Chapter ${ch.number}: ${ch.title}`,
@@ -415,7 +406,7 @@ export default function StudentDashboardScreen({
       progress: ch.progress,
       fileName: ch.fileName,
       isDone: ch.progress === 100,
-      isInProgress: ch.progress > 0 && ch.progress < 100,
+      isInProgress: ch.progress >= 0 && ch.progress < 100,
     })),
     { id: 'm7', title: 'Final Defense', date: 'Nov 20, 2026', isDone: false },
   ];
@@ -534,6 +525,7 @@ export default function StudentDashboardScreen({
                 color="#FFFFFF"
               />
             </TouchableOpacity>
+
             <Text style={styles.dashHeaderTitle}>
               {studentDashView === 'main'
                 ? 'Dashboard'
@@ -565,8 +557,9 @@ export default function StudentDashboardScreen({
                 ? 'Profile'
                 : 'Dashboard'}
             </Text>
+
             {studentDashView === 'references' ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
                   style={styles.headerIconTouch}
                   onPress={() => setStudentDashView('scholar')}
@@ -622,11 +615,9 @@ export default function StudentDashboardScreen({
       >
         {studentDashView === 'main' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
-            {/* DYNAMIC SURNAME DISPLAY */}
             <Text style={styles.dashGreetingTitle}>Hello, {studentSurname}!</Text>
             <Text style={styles.dashGreetingSub}>Here's your thesis progress overview</Text>
 
-            {/* ROW 1: OVERALL PROGRESS */}
             <TouchableOpacity
               style={styles.dashWhiteCard}
               activeOpacity={0.85}
@@ -643,7 +634,6 @@ export default function StudentDashboardScreen({
               <Text style={styles.progressSubText}>{overallProgress}% completed</Text>
             </TouchableOpacity>
 
-            {/* ROW 2: STATS SUMMARY CARDS */}
             <View style={styles.statsRowGrid}>
               <View style={styles.statMiniCard}>
                 <Text style={styles.statMiniLabel}>Chapters</Text>
@@ -663,14 +653,11 @@ export default function StudentDashboardScreen({
               </View>
               <View style={styles.statMiniCard}>
                 <Text style={[styles.statMiniLabel, { color: '#DC2626' }]}>Overdue</Text>
-                <Text style={[styles.statMiniValue, { color: '#DC2626' }]}>
-                  {overdueTasksCount}
-                </Text>
+                <Text style={[styles.statMiniValue, { color: '#DC2626' }]}>{overdueTasksCount}</Text>
                 <Text style={styles.statSubText}>Tasks</Text>
               </View>
             </View>
 
-            {/* ROW 3: MILESTONE PROGRESS */}
             <View style={styles.dashWhiteCard}>
               <View style={styles.rowBetween}>
                 <Text style={styles.cardHeaderTitle}>Milestone Progress</Text>
@@ -708,7 +695,6 @@ export default function StudentDashboardScreen({
               ))}
             </View>
 
-            {/* ROW 4: UPCOMING DEADLINES */}
             <View style={styles.dashWhiteCard}>
               <View style={styles.rowBetween}>
                 <Text style={styles.cardHeaderTitle}>Upcoming Deadlines</Text>
@@ -739,7 +725,6 @@ export default function StudentDashboardScreen({
               </View>
             </View>
 
-            {/* ROW 5: RECENT ACTIVITY */}
             <View style={styles.dashWhiteCard}>
               <View style={styles.rowBetween}>
                 <Text style={styles.cardHeaderTitle}>Recent Activity</Text>
@@ -771,7 +756,6 @@ export default function StudentDashboardScreen({
           </ScrollView>
         )}
 
-        {/* THESIS WORKSPACE VIEW */}
         {studentDashView === 'workspace' && (
           <ThesisWorkspaceScreen
             selectedThesis={selectedThesis}
@@ -795,12 +779,10 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* ADVISER FEEDBACK VIEW */}
         {studentDashView === 'feedback' && (
           <AdviserFeedbackScreen setStudentDashView={setStudentDashView} />
         )}
 
-        {/* REFERENCES SCREEN VIEW */}
         {studentDashView === 'references' && (
           <ReferenceScreen
             setStudentDashView={setStudentDashView}
@@ -812,7 +794,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* GOOGLE SCHOLAR RESULTS SCREEN VIEW */}
         {studentDashView === 'scholar' && (
           <GoogleScholarScreen
             setStudentDashView={setStudentDashView}
@@ -820,7 +801,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* MEETINGS SCREEN VIEW */}
         {studentDashView === 'meetings' && (
           <MeetingsScreen
             setStudentDashView={setStudentDashView}
@@ -829,7 +809,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* THESIS GROUP CHAT SCREEN VIEW */}
         {studentDashView === 'chat' && (
           <ThesisGroupChatScreen
             setStudentDashView={setStudentDashView}
@@ -838,7 +817,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* AI ASSISTANT VIEW */}
         {studentDashView === 'ai' && (
           <AIAssistantScreen
             setStudentDashView={setStudentDashView}
@@ -847,7 +825,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* PEER ASSESSMENT SCREEN VIEW */}
         {studentDashView === 'peer' && (
           <PeerAssessmentScreen
             setStudentDashView={setStudentDashView}
@@ -856,7 +833,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* DEFENSE PREPARATION SCREEN VIEW */}
         {studentDashView === 'defense' && (
           <DefensePreparationScreen
             setStudentDashView={setStudentDashView}
@@ -865,7 +841,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* SETTINGS SCREEN VIEW */}
         {studentDashView === 'settings' && (
           <SettingsScreen
             setStudentDashView={setStudentDashView}
@@ -875,7 +850,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* HELP & SUPPORT SCREEN VIEW */}
         {studentDashView === 'help' && (
           <HelpSupportScreen
             setStudentDashView={setStudentDashView}
@@ -884,7 +858,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* PROFILE SCREEN VIEW */}
         {studentDashView === 'profile' && (
           <ProfileScreen
             setStudentDashView={setStudentDashView}
@@ -900,7 +873,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* FILE REPOSITORY VIEW */}
         {studentDashView === 'files' && (
           <FileRepositoryScreen
             searchFileQuery={searchFileQuery}
@@ -910,7 +882,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* TASKS SCREEN VIEW */}
         {studentDashView === 'tasks' && (
           <TasksScreen
             tasksList={tasksList as any}
@@ -920,7 +891,6 @@ export default function StudentDashboardScreen({
           />
         )}
 
-        {/* NOTIFICATIONS SCREEN VIEW */}
         {studentDashView === 'notifications' && (
           <View style={{ flex: 1 }}>
             <View style={styles.notifFilterTabBar}>
@@ -957,8 +927,9 @@ export default function StudentDashboardScreen({
                 </Text>
               </TouchableOpacity>
             </View>
+
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-              {filteredNotifications.filter((item) => item.group === 'Today').length >= 0 && (
+              {filteredNotifications.filter((item) => item.group === 'Today').length > 0 && (
                 <>
                   <Text style={styles.notifGroupHeading}>Today</Text>
                   {filteredNotifications
@@ -970,26 +941,13 @@ export default function StudentDashboardScreen({
                         activeOpacity={0.7}
                         onPress={() => handleNotificationPress(notif.targetView)}
                       >
-                        <View
-                          style={[
-                            styles.notifIconCircle,
-                            { backgroundColor: notif.iconBg },
-                          ]}
-                        >
+                        <View style={[styles.notifIconCircle, { backgroundColor: notif.iconBg }]}>
                           {notif.type === 'feedback' ? (
                             <Ionicons name="person" size={24} color="#FFFFFF" />
                           ) : notif.type === 'ai' ? (
-                            <MaterialCommunityIcons
-                              name="robot-outline"
-                              size={24}
-                              color="#1E58A8"
-                            />
+                            <MaterialCommunityIcons name="robot-outline" size={24} color="#1E58A8" />
                           ) : (
-                            <Ionicons
-                              name={notif.iconName as any}
-                              size={22}
-                              color="#1E58A8"
-                            />
+                            <Ionicons name={notif.iconName as any} size={22} color="#1E58A8" />
                           )}
                         </View>
                         <View style={styles.notifTextContent}>
@@ -1011,7 +969,6 @@ export default function StudentDashboardScreen({
           </View>
         )}
 
-        {/* ROADMAP TIMELINE SCREEN VIEW */}
         {studentDashView === 'roadmap' && (
           <View style={{ flex: 1 }}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
@@ -1024,7 +981,9 @@ export default function StudentDashboardScreen({
                   <View style={[styles.roadmapFillBar, { width: `${overallProgress}%` }]} />
                 </View>
               </View>
+
               <View style={styles.roadmapDividerLine} />
+
               <View style={styles.timelineListContainer}>
                 {roadmapMilestones.map((item, index) => {
                   const isLast = index === roadmapMilestones.length - 1;
@@ -1059,34 +1018,30 @@ export default function StudentDashboardScreen({
           </View>
         )}
 
-        {/* DEADLINES VIEW */}
         {studentDashView === 'deadlines' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
             <TouchableOpacity style={styles.backButtonRow} onPress={() => setStudentDashView('main')}>
               <Ionicons name="arrow-back" size={20} color="#1E58A8" />
               <Text style={styles.backButtonText}>Back to Dashboard</Text>
             </TouchableOpacity>
+
             <Text style={styles.sectionHeaderTitle}>All Deadlines & Submissions</Text>
             <Text style={styles.sectionHeaderSub}>
               Check requirements and inspect submitted files
             </Text>
+
             {chaptersList.map((ch) => (
               <View key={ch.id} style={styles.deadlineCardBox}>
                 <View style={styles.rowBetween}>
                   <Text style={styles.deadlineTitleText}>
                     Chapter {ch.number}: {ch.title}
                   </Text>
-                  <Text
-                    style={
-                      ch.progress === 100
-                        ? styles.greenBadgeText
-                        : styles.yellowBadgeText
-                    }
-                  >
+                  <Text style={ch.progress === 100 ? styles.greenBadgeText : styles.yellowBadgeText}>
                     {ch.progress === 100 ? 'Submitted' : 'Pending'}
                   </Text>
                 </View>
                 <Text style={styles.deadlineDateText}>Requirement: Final Draft PDF Submission</Text>
+
                 {ch.fileName ? (
                   <TouchableOpacity
                     style={styles.inspectBtnRow}
@@ -1114,17 +1069,16 @@ export default function StudentDashboardScreen({
           </ScrollView>
         )}
 
-        {/* RECENT ACTIVITY VIEW */}
         {studentDashView === 'activity' && (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
             <TouchableOpacity style={styles.backButtonRow} onPress={() => setStudentDashView('main')}>
               <Ionicons name="arrow-back" size={20} color="#1E58A8" />
               <Text style={styles.backButtonText}>Back to Dashboard</Text>
             </TouchableOpacity>
+
             <Text style={styles.sectionHeaderTitle}>Recent Educator Activity</Text>
-            <Text style={styles.sectionHeaderSub}>
-              Real-time updates on checks, feedback, and grades
-            </Text>
+            <Text style={styles.sectionHeaderSub}>Real-time updates on checks, feedback, and grades</Text>
+
             {activityLogsList.map((act) => (
               <View key={act.id} style={styles.activityFullCard}>
                 <View style={styles.actAvatarCircle}>
@@ -1143,7 +1097,6 @@ export default function StudentDashboardScreen({
         )}
       </View>
 
-      {/* BOTTOM NAVIGATION BAR */}
       {!isMenuOpen && (
         <View style={styles.bottomNavContainer}>
           <TouchableOpacity style={styles.navTabItem} onPress={() => setStudentDashView('main')}>
@@ -1161,6 +1114,7 @@ export default function StudentDashboardScreen({
               Dashboard
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.navTabItem}
             onPress={() => {
@@ -1187,6 +1141,7 @@ export default function StudentDashboardScreen({
               Workspace
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.navTabItem} onPress={() => setStudentDashView('chat')}>
             <Ionicons
               name="chatbubble-ellipses-outline"
@@ -1202,6 +1157,7 @@ export default function StudentDashboardScreen({
               Chat
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.navTabItem} onPress={() => setStudentDashView('tasks')}>
             <Octicons
               name="tasklist"
@@ -1217,6 +1173,7 @@ export default function StudentDashboardScreen({
               Tasks
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.navTabItem} onPress={() => setStudentDashView('profile')}>
             <Ionicons
               name="person"
@@ -1235,17 +1192,18 @@ export default function StudentDashboardScreen({
         </View>
       )}
 
-      {/* DRAWER MENU MODAL */}
       <Modal visible={isMenuOpen} transparent animationType="fade" statusBarTranslucent>
         <View style={styles.drawerOverlay}>
           <View style={styles.drawerContentCard}>
             <TouchableOpacity style={styles.drawerCloseBtn} onPress={() => setIsMenuOpen(false)}>
               <Ionicons name="arrow-back" size={22} color="#000000" />
             </TouchableOpacity>
+
             <View style={styles.drawerBrandHeader}>
               <Ionicons name="school" size={44} color="#1E58A8" />
               <Text style={styles.drawerBrandTitle}>ThesisPilot</Text>
             </View>
+
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
               <TouchableOpacity
                 style={[
@@ -1268,6 +1226,7 @@ export default function StudentDashboardScreen({
                   Dashboard
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1289,6 +1248,7 @@ export default function StudentDashboardScreen({
                   Thesis Workspace
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1310,6 +1270,7 @@ export default function StudentDashboardScreen({
                   Tasks
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1331,6 +1292,7 @@ export default function StudentDashboardScreen({
                   Adviser Feedback
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1358,6 +1320,7 @@ export default function StudentDashboardScreen({
                   References
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1379,6 +1342,7 @@ export default function StudentDashboardScreen({
                   Meetings
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1400,6 +1364,7 @@ export default function StudentDashboardScreen({
                   Chat
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1421,6 +1386,7 @@ export default function StudentDashboardScreen({
                   A.I Assistant
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1442,6 +1408,7 @@ export default function StudentDashboardScreen({
                   Peer Assessment
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1463,7 +1430,9 @@ export default function StudentDashboardScreen({
                   Defense Preparation
                 </Text>
               </TouchableOpacity>
+
               <View style={styles.drawerDivider} />
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1485,6 +1454,7 @@ export default function StudentDashboardScreen({
                   Settings
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.drawerMenuItem,
@@ -1506,6 +1476,7 @@ export default function StudentDashboardScreen({
                   Help & Support
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.drawerMenuItem}
                 onPress={() => handleMenuSelect('logout')}
@@ -1515,20 +1486,22 @@ export default function StudentDashboardScreen({
                   Logout
                 </Text>
               </TouchableOpacity>
+
               <Text style={styles.appVersionText}>App Version 1.0.0</Text>
             </ScrollView>
           </View>
+
           <TouchableOpacity style={styles.drawerDismissArea} onPress={() => setIsMenuOpen(false)} />
         </View>
       </Modal>
 
-      {/* CREATE, EDIT & DELETE NOTE MODAL */}
       <Modal visible={showNoteModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
             <Text style={styles.modalHeaderTitle}>
               {editingNote ? 'Edit Thesis Note' : 'Create New Thesis Note'}
             </Text>
+
             <Text style={styles.inputLabelText}>Note Title</Text>
             <TextInput
               style={styles.modalTextInput}
@@ -1537,6 +1510,7 @@ export default function StudentDashboardScreen({
               value={noteTitleInput}
               onChangeText={setNoteTitleInput}
             />
+
             <Text style={styles.inputLabelText}>Initial Ideas / Content</Text>
             <TextInput
               style={[styles.modalTextInput, { height: 100, textAlignVertical: 'top' }]}
@@ -1546,21 +1520,18 @@ export default function StudentDashboardScreen({
               value={noteContentInput}
               onChangeText={setNoteContentInput}
             />
+
             <View style={styles.modalActionRow}>
               {editingNote && (
                 <TouchableOpacity
                   style={[styles.dangerRedBtn, { flex: 1, paddingHorizontal: 8 }]}
                   onPress={handleDeleteNoteSubmit}
                 >
-                  <Ionicons
-                    name="trash-outline"
-                    size={16}
-                    color="#FFFFFF"
-                    style={{ marginRight: 4 }}
-                  />
+                  <Ionicons name="trash-outline" size={16} color="#FFFFFF" style={{ marginRight: 4 }} />
                   <Text style={styles.dangerRedBtnText}>Delete</Text>
                 </TouchableOpacity>
               )}
+
               <TouchableOpacity
                 style={[styles.cancelOutlineBtn, { flex: 1 }]}
                 onPress={() => {
@@ -1572,6 +1543,7 @@ export default function StudentDashboardScreen({
               >
                 <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={[styles.primaryBlueBtn, { flex: 1 }]}
                 onPress={handleSaveNoteSubmit}
@@ -1585,7 +1557,6 @@ export default function StudentDashboardScreen({
         </View>
       </Modal>
 
-      {/* REPLY TO ADVISER FEEDBACK MODAL */}
       <Modal visible={showReplyModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
@@ -1595,6 +1566,7 @@ export default function StudentDashboardScreen({
             <Text style={{ fontSize: 12, color: '#64748B', marginBottom: 8 }}>
               Re: {replyingFeedback?.chapterTag}
             </Text>
+
             <TextInput
               style={[styles.modalTextInput, { height: 100, textAlignVertical: 'top' }]}
               placeholder="Type your reply or questions regarding this feedback..."
@@ -1603,6 +1575,7 @@ export default function StudentDashboardScreen({
               value={replyTextInput}
               onChangeText={setReplyTextInput}
             />
+
             <View style={styles.modalActionRow}>
               <TouchableOpacity
                 style={[styles.cancelOutlineBtn, { flex: 1 }]}
@@ -1614,10 +1587,8 @@ export default function StudentDashboardScreen({
               >
                 <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.primaryBlueBtn, { flex: 1 }]}
-                onPress={handleSendReply}
-              >
+
+              <TouchableOpacity style={[styles.primaryBlueBtn, { flex: 1 }]} onPress={handleSendReply}>
                 <Text style={styles.primaryBlueBtnText}>Send Reply</Text>
               </TouchableOpacity>
             </View>
@@ -1625,11 +1596,11 @@ export default function StudentDashboardScreen({
         </View>
       </Modal>
 
-      {/* ADD CHAPTER MODAL WITH PHONE FILE ACCESS */}
       <Modal visible={showAddChapterModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
             <Text style={styles.modalHeaderTitle}>Add New Chapter</Text>
+
             <Text style={styles.inputLabelText}>Chapter Title</Text>
             <TextInput
               style={styles.modalTextInput}
@@ -1638,6 +1609,7 @@ export default function StudentDashboardScreen({
               value={newChapterTitle}
               onChangeText={setNewChapterTitle}
             />
+
             <TouchableOpacity
               style={styles.uploadDashedBox}
               onPress={() => {
@@ -1648,11 +1620,10 @@ export default function StudentDashboardScreen({
             >
               <Ionicons name="cloud-upload-outline" size={24} color="#1E58A8" />
               <Text style={styles.uploadDashedText}>
-                {newChapterFile
-                  ? `Attached: ${newChapterFile}`
-                  : 'Upload Initial File from Phone'}
+                {newChapterFile ? `Attached: ${newChapterFile}` : 'Upload Initial File from Phone'}
               </Text>
             </TouchableOpacity>
+
             <View style={styles.modalActionRow}>
               <TouchableOpacity
                 style={styles.cancelOutlineBtn}
@@ -1664,6 +1635,7 @@ export default function StudentDashboardScreen({
               >
                 <Text style={styles.cancelOutlineBtnText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity style={styles.primaryBlueBtn} onPress={handleAddChapterSubmit}>
                 <Text style={styles.primaryBlueBtnText}>Create Chapter</Text>
               </TouchableOpacity>
@@ -1672,11 +1644,11 @@ export default function StudentDashboardScreen({
         </View>
       </Modal>
 
-      {/* PROJECT SELECTION MODAL */}
       <Modal visible={showProjectSelectModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
             <Text style={styles.modalHeaderTitle}>Select Thesis Project</Text>
+
             {thesisProjectsList.map((proj) => (
               <TouchableOpacity
                 key={proj.id}
@@ -1696,11 +1668,10 @@ export default function StudentDashboardScreen({
                 <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0F172A' }}>
                   {proj.title}
                 </Text>
-                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
-                  {proj.adviser}
-                </Text>
+                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{proj.adviser}</Text>
               </TouchableOpacity>
             ))}
+
             <TouchableOpacity
               style={[styles.cancelOutlineBtn, { marginTop: 8 }]}
               onPress={() => setShowProjectSelectModal(false)}
@@ -1711,13 +1682,13 @@ export default function StudentDashboardScreen({
         </View>
       </Modal>
 
-      {/* CLEAR CHAPTER ACTIONS MODAL WITH PHONE FILE ACCESS */}
       <Modal visible={showFileInspectModal} transparent animationType="fade">
         <View style={styles.modalOverlayDark}>
           <View style={styles.modalWhiteCard}>
             <Text style={styles.modalHeaderTitle}>
               Chapter {selectedInspectChapter?.number}: {selectedInspectChapter?.title}
             </Text>
+
             <TouchableOpacity
               style={styles.fileDetailsCardBox}
               activeOpacity={0.75}
@@ -1731,10 +1702,10 @@ export default function StudentDashboardScreen({
                 {selectedInspectChapter?.fileName || 'Chapter1_Final.pdf'}
               </Text>
               <Text style={styles.fileDetailsStatusText}>
-                Status: {selectedInspectChapter?.status || 'Approved'} (
-                {selectedInspectChapter?.progress || 100}%)
+                Status: {selectedInspectChapter?.status || 'Approved'} ({selectedInspectChapter?.progress || 100}%)
               </Text>
             </TouchableOpacity>
+
             <View style={styles.modalButtonStack}>
               <TouchableOpacity
                 style={styles.primaryBlueBtn}
@@ -1745,18 +1716,14 @@ export default function StudentDashboardScreen({
                   }
                 }}
               >
-                <Ionicons
-                  name="cloud-upload-outline"
-                  size={18}
-                  color="#FFFFFF"
-                  style={{ marginRight: 6 }}
-                />
+                <Ionicons name="cloud-upload-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
                 <Text style={styles.primaryBlueBtnText}>
                   {selectedInspectChapter?.fileName
                     ? 'Re-submit / Choose File from Phone'
                     : 'Upload File Now'}
                 </Text>
               </TouchableOpacity>
+
               {selectedInspectChapter?.fileName && (
                 <TouchableOpacity
                   style={styles.deleteFileBtn}
@@ -1767,15 +1734,11 @@ export default function StudentDashboardScreen({
                     }
                   }}
                 >
-                  <Ionicons
-                    name="document-text-outline"
-                    size={18}
-                    color="#DC2626"
-                    style={{ marginRight: 6 }}
-                  />
+                  <Ionicons name="document-text-outline" size={18} color="#DC2626" style={{ marginRight: 6 }} />
                   <Text style={styles.deleteFileBtnText}>Delete Attached File Only</Text>
                 </TouchableOpacity>
               )}
+
               <TouchableOpacity
                 style={styles.dangerRedBtn}
                 activeOpacity={0.85}
@@ -1785,14 +1748,10 @@ export default function StudentDashboardScreen({
                   }
                 }}
               >
-                <Ionicons
-                  name="trash-outline"
-                  size={18}
-                  color="#FFFFFF"
-                  style={{ marginRight: 6 }}
-                />
+                <Ionicons name="trash-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
                 <Text style={styles.dangerRedBtnText}>Delete Chapter Entirely</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.cancelOutlineBtn}
                 activeOpacity={0.85}
@@ -1805,7 +1764,6 @@ export default function StudentDashboardScreen({
         </View>
       </Modal>
 
-      {/* LOGOUT CONFIRMATION MODAL */}
       <Modal visible={showLogoutModal} transparent animationType="fade" statusBarTranslucent>
         <View style={styles.modalOverlayDark}>
           <View style={styles.logoutBlueCard}>
@@ -1819,6 +1777,7 @@ export default function StudentDashboardScreen({
               >
                 <Text style={styles.logoutCancelText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.logoutConfirmRedBtn}
                 activeOpacity={0.85}
@@ -2422,7 +2381,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#FCA5A5',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
